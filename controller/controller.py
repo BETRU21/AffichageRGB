@@ -6,7 +6,7 @@ from gui.Window import Window
 
 class control():
     def __init__(self):
-        self.matrixRGB = []
+
     
     def create_matrix_rgb(self, height, width):
         self.matrixRGB = np.zeros((height, width, 3))
