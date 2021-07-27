@@ -6,6 +6,6 @@ import sys
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     ui = Window()
-    ui.setWindowTitle("This is the window title")
+    ui.setWindowTitle("affichageRGB")
     ui.show()
     sys.exit(app.exec_())

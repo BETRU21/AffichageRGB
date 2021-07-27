@@ -41,6 +41,9 @@
              <property name="styleSheet">
               <string notr="true">background-color: rgb(255, 121, 121);</string>
              </property>
+             <property name="maximum">
+              <number>255</number>
+             </property>
             </widget>
            </item>
            <item>
@@ -55,6 +58,12 @@
              <property name="styleSheet">
               <string notr="true">background-color: rgb(255, 121, 121);</string>
              </property>
+             <property name="maximum">
+              <number>255</number>
+             </property>
+             <property name="value">
+              <number>85</number>
+             </property>
             </widget>
            </item>
           </layout>
@@ -65,6 +74,12 @@
             <widget class="QSpinBox" name="sb_lowGreen">
              <property name="styleSheet">
               <string notr="true">background-color: rgb(125, 231, 106);</string>
+             </property>
+             <property name="maximum">
+              <number>255</number>
+             </property>
+             <property name="value">
+              <number>86</number>
              </property>
             </widget>
            </item>
@@ -80,6 +95,12 @@
              <property name="styleSheet">
               <string notr="true">background-color: rgb(125, 231, 106);</string>
              </property>
+             <property name="maximum">
+              <number>255</number>
+             </property>
+             <property name="value">
+              <number>170</number>
+             </property>
             </widget>
            </item>
           </layout>
@@ -90,6 +111,12 @@
             <widget class="QSpinBox" name="sb_lowBlue">
              <property name="styleSheet">
               <string notr="true">background-color: rgb(138, 173, 255);</string>
+             </property>
+             <property name="maximum">
+              <number>255</number>
+             </property>
+             <property name="value">
+              <number>171</number>
              </property>
             </widget>
            </item>
@@ -104,6 +131,12 @@
             <widget class="QSpinBox" name="sb_highBlue">
              <property name="styleSheet">
               <string notr="true">background-color: rgb(138, 173, 255);</string>
+             </property>
+             <property name="maximum">
+              <number>255</number>
+             </property>
+             <property name="value">
+              <number>255</number>
              </property>
             </widget>
            </item>

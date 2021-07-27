@@ -7,14 +7,18 @@ import time
 import re
 import numpy as np
 
+
 path = "C:/Users/Benjamin/Desktop/RawData"
 
-class Model():
+class HyperSpectralImage():
     def __init__(self):
         self.matrixData = None
         self.dataLen = 0
         self.width = 0
         self.height = 0
+        self.rangeLen = 0
+        self.minWaveLength = None
+        self.maxWaveLength = None
 
 
     def listNameOfFiles(self, directory: str, extension="csv") -> list:
@@ -54,6 +58,9 @@ class Model():
                         elem = elem_str.split(",")
                         x.append(float(elem[1]))
                     self.dataLen = len(x)
+                    self.rangeLen = abs(x[-1] - x[0])
+                    self.minWaveLength = round(x[0])
+                    self.maxWaveLength = round(x[-1])
                 else:
                     pass
 
@@ -61,6 +68,7 @@ class Model():
         self.width += 1
         self.height += 1
         self.matrixData = np.zeros((self.height, self.width, self.dataLen))
+        self.didGetMatrixInfo()
 
         # Put each pixel in the data at the good position
         for i, name in enumerate(sortedPaths):
@@ -81,9 +89,15 @@ class Model():
                     elem = elem_str.split(",")
                     y.append(float(elem[1]))
                 self.matrixData[posY, posX, :] = y
-
+        self.matrixFinished()
         print(self.matrixData)
 
+    def matrixFinished(self):
+        control().create_matrix_rgb(self.height, self.width)
+        control().matrixRGB_replace(self.matrixData, self.dataLen, self.rangeLen)
+
+    def didGetMatrixInfo(self):
+        control().giveRangeInfo(self.minWaveLength, self.maxWaveLength, self.rangeLen)
 
 if __name__ == "__main__":
     Model().buildMatrix(path)

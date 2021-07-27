@@ -1,26 +1,24 @@
 import numpy as np
+from gui.Window import Window
 
 
 
 
-class controller():
+class control():
     def __init__(self):
-        super().__init__(parent)
+        self.matrixRGB = []
     
-    def create_matrix_rgb(self):
-        self.matrixRGB = np.zeros((self.height, self.width, 3))
+    def create_matrix_rgb(self, height, width):
+        self.matrixRGB = np.zeros((height, width, 3))
 
 
-    def matrixRGB_replace(self):
-
-        matrix = self.matrixRawData
-
-        lowRed = int(((self.sb_lowRed.value() - self.minWaveLength) / self.rangeLen) * len(self.waves))
-        highRed = int(((self.sb_highRed.value() - self.minWaveLength) / self.rangeLen) * len(self.waves))
-        lowGreen = int(((self.sb_lowGreen.value() - self.minWaveLength) / self.rangeLen) * len(self.waves))
-        highGreen = int(((self.sb_highGreen.value() - self.minWaveLength) / self.rangeLen) * len(self.waves))
-        lowBlue = int(((self.sb_lowBlue.value() - self.minWaveLength) / self.rangeLen) * len(self.waves))
-        highBlue = int(((self.sb_highBlue.value() - self.minWaveLength) / self.rangeLen) * len(self.waves))
+    def matrixRGB_replace(self, matrix, dataLen, rangeLen):
+        lowRed = int(((self.sb_lowRed.value() - self.minWaveLength) / rangeLen) * dataLen)
+        highRed = int(((self.sb_highRed.value() - self.minWaveLength) / rangeLen) * dataLen)
+        lowGreen = int(((self.sb_lowGreen.value() - self.minWaveLength) / rangeLen) * dataLen)
+        highGreen = int(((self.sb_highGreen.value() - self.minWaveLength) / rangeLen) * dataLen)
+        lowBlue = int(((self.sb_lowBlue.value() - self.minWaveLength) / rangeLen) * dataLen)
+        highBlue = int(((self.sb_highBlue.value() - self.minWaveLength) / rangeLen) * dataLen)
 
         self.matrixRGB[:, :, 0] = matrix[:, :, lowRed:highRed].sum(axis=2)
         self.matrixRGB[:, :, 1] = matrix[:, :, lowGreen:highGreen].sum(axis=2)
@@ -39,10 +37,12 @@ class controller():
 
         self.matrixRGB = self.matrixRGB.round(0)
 
-    def run(self):
+    def giveRangeInfo(minWaveLength, maxWaveLength, rangeLen):
         pass
+        #Window().set_range_to_wave(minWaveLength, maxWaveLength, rangeLen)
 
-if __name__ == "__main__":
-    pass
+    def run(self, path):
+        Model().buildMatrix(path)
+
 
 
