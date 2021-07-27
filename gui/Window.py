@@ -5,12 +5,18 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtGui import QIcon
 import matplotlib.pyplot as plt
 import numpy as np
-import random
 from tools.ThreadWorker import Worker
 from PyQt5.QtCore import pyqtSignal, Qt, QThreadPool, QThread, QTimer
 from PyQt5.QtWidgets import QWidget, QFileDialog
 import ctypes
 import sys
+
+import pandas as pd
+from tkinter.filedialog import askopenfile
+import csv
+import fnmatch
+import time
+import re
 
 application_path = os.path.abspath("")
 
@@ -29,15 +35,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.setWindowIcon(QIcon(application_path + "{0}gui{0}misc{0}logo{0}logo.ico".format(os.sep)))
         self.connect_widgets()
-        self.longTaskWorker = Worker(self.buildMatrix)
-        self.longTaskThread = QThread()
-        self.create_threads()
-
         self.folderpath = ""
-
-    def create_threads(self):
-        self.longTaskWorker.moveToThread(self.longTaskThread)
-        self.longTaskThread.started.connect(self.longTaskWorker.run)
 
     def connect_widgets(self):
         self.graph_rgb.scene().sigMouseMoved.connect(self.mouse_moved)
@@ -45,11 +43,79 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def select_save_folder(self):
         self.folderPath = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
-        self.longTaskThread.start()
+        self.buildMatrix()
+        self.create_matrix_rgb()
+        self.matrixRGB_replace()
         self.pb_search.setEnabled(False)
 
     def buildMatrix(self):
-        pass
+        foundFiles = []
+        for file in os.listdir(self.folderPath):
+            if fnmatch.fnmatch(file, f'*.csv'):
+                foundFiles.append(file)
+
+        nb = len(foundFiles)
+        print("nombre de fichier :", nb)
+
+        sortedPaths = (foundFiles)
+        val1Max = 0
+        val2Max = 0
+        dataLen = 0
+
+        for i in range(nb):
+            nom = sortedPaths[i]
+            matchObj = re.match("\\D*?(\\d+)\\D*?(\\d+)\\D*?", nom)
+            if matchObj:
+                val1 = int(matchObj.group(1))
+                val2 = int(matchObj.group(2))
+                # Nom du fichier à importer
+                fich = open(self.folderPath + '/' + nom, "r")
+                test_str = list(fich)[14:]
+                fich.close()
+                x = []
+                if val1 > val1Max:
+                    val1Max = val1
+                if val2 > val2Max:
+                    val2Max = val2
+                # Nettoyer les informations
+                if dataLen == 0:
+                    for j in test_str:
+                        elem_str = j.replace("\n", "")
+                        elem = elem_str.split(",")
+                        x.append(float(elem[1]))
+                    dataLen = len(x)
+                else:
+                    pass
+
+
+        self.matrixRawData = np.zeros((val2Max+1, val1Max+1, dataLen))
+
+        for i in range(nb):
+            nom = sortedPaths[i]
+            matchObj = re.match("\\D*?(\\d+)\\D*?(\\d+)\\D*?", nom)
+            if matchObj:
+                val1 = int(matchObj.group(1))
+                val2 = int(matchObj.group(2))
+                # Nom du fichier à importer
+                fich = open(self.folderPath + '/' + nom, "r")
+                test_str = list(fich)[14:]
+                fich.close()
+                x = []
+                y = []
+                # Nettoyer les informations
+                for j in test_str:
+                    elem_str = j.replace("\n", "")
+                    elem = elem_str.split(",")
+                    y.append(float(elem[1]))
+                self.matrixRawData[val1, val2, :] = y
+        print(self.matrixRawData)
+
+    def listNameOfFiles(directory: str, extension="csv") -> list:
+        foundFiles = []
+        for file in os.listdir(directory):
+            if fnmatch.fnmatch(file, f'*.{extension}'):
+                foundFiles.append(file)
+        return foundFiles
 
     def create_plot_rgb(self):
         self.graph_rgb.clear()
@@ -142,10 +208,8 @@ class Window(QMainWindow, Ui_MainWindow):
 
 
     def matrixRGB_replace(self):
-        if self.visualWithoutBackground:
-            matrix = self.matrixDataWithoutBackground
-        else:
-            matrix = self.matrixRawData
+
+        matrix = self.matrixRawData
 
         lowRed = int(((self.sb_lowRed.value() - self.minWaveLength) / self.rangeLen) * len(self.waves))
         highRed = int(((self.sb_highRed.value() - self.minWaveLength) / self.rangeLen) * len(self.waves))
