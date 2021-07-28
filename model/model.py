@@ -21,35 +21,42 @@ class HyperSpectralImage:
     def resetSpectrum(self, x, y, spectrum):
         self.data = []
 
-    def returnWidth(self, data):
+    def returnWidthImage(self, data):
         width = 0
         for i, item in enumerate(data):
             if item[0][0] > width:
                 width = item[0][0]
             else:
                 pass
+
         return width + 1
 
-    def returnHeight(self, data):
+    def returnHeightImage(self, data):
         height = 0
         for i, item in enumerate(data):
             if item[0][1] > height:
                 height = item[0][1]
             else:
                 pass
+
         return height + 1
 
     def returnSpectrumLen(self, data): # On s'en fout duquel c'est obligé d`être la même longueur
-        return len(data[0][1])
+        try:
+            return len(data[0][1])
 
+        except Exception as e:
+            print(f'ERROR : {e}')
 
     def dataToMatrix(self, data):
         width = returnWidth(data)
         height = returnHeight(data)
         spectrumLen = returnSpectrumLen(data)
         matrixData = np.zeros((height, width, spectrumLen))
+
         for i, item in enumerate(data):
             matrixData[item[0][1], item[0][0], :] = item[1]
+
         return matrixData
 
     def matrixToRGB(self, data):

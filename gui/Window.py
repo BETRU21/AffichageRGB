@@ -230,14 +230,6 @@ class Window(QMainWindow, Ui_MainWindow):
             self.plotBlueRange.setData(self.waves, self.blueRange, pen=(0, 0, 255))
             self.plotBlack.setData(self.waves, np.full(len(self.waves), minimum), pen=(0, 0, 0))
 
-        if not self.colorRangeViewEnable:
-            self.plotRedRange.setData(self.waves, np.full(len(self.waves), minimum), pen=(0, 0, 0))
-            self.plotGreenRange.setData(self.waves, np.full(len(self.waves), minimum), pen=(0, 0, 0))
-            self.plotBlueRange.setData(self.waves, np.full(len(self.waves), minimum), pen=(0, 0, 0))
-            self.plotBlack.setData(self.waves, np.full(len(self.waves), minimum), pen=(0, 0, 0))
-
-        self.plotSpectrum.setData(self.waves, matrix[self.mousePositionY, self.mousePositionX, :])
-
 
 
 
