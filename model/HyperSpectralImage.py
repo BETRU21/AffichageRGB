@@ -61,60 +61,69 @@ class HyperSpectralImage:
         except:
             return None
 
-    def returnSpectrumRange(self, data):
-        return round(abs(data[0][1][0] - data[0][1][-1]))
+    def returnSpectrumRange(self, wavelength):
+        try:
+            return round(abs(wavelength[-1] - wavelength[0]))
+        except:
+            return None
 
     def dataToMatrix(self, data):
-        width = returnWidthImage(data)
-        height = returnHeightImage(data)
-        spectrumLen = returnSpectrumLen(data)
-        matrixData = np.zeros((height, width, spectrumLen))
+        try:
+            width = self.returnWidthImage(data)
+            height = self.returnHeightImage(data)
+            spectrumLen = self.returnSpectrumLen(data)
+            matrixData = np.zeros((height, width, spectrumLen))
 
-        for item in data:
-            matrixData[item[0][1], item[0][0], :] = np.array(item[1])
+            for item in data:
+                matrixData[item[0][1], item[0][0], :] = np.array(item[1])
 
-        return matrixData
+            return matrixData
+        except:
+            return None
 
-    def matrixToRGB(self, data, globalMaximum=True):
-        width = returnWidth(data)
-        height = returnHeight(data)
-        spectrumLen = returnSpectrumLen(data)
+    def dataToRGB(self, data, globalMaximum=True):
+        try:
+            width = self.returnWidthImage(data)
+            height = self.returnHeightImage(data)
+            spectrumLen = self.returnSpectrumLen(data)
 
-        lowRed = 0
-        highRed = int(spectrumLen / 3)
-        lowGreen = int(spectrumLen / 3)
-        highGreen = int(spectrumLen * (2 / 3))
-        lowBlue = int(spectrumLen * (2 / 3))
-        highBlue = int(spectrumLen)
+            lowRed = 0
+            highRed = int(spectrumLen / 3)
+            lowGreen = int(spectrumLen / 3)
+            highGreen = int(spectrumLen * (2 / 3))
+            lowBlue = int(spectrumLen * (2 / 3))
+            highBlue = int(spectrumLen)
+
+            matrixRGB = np.zeros((height, width, 3))
+            matrix = self.dataToMatrix(data)
+
+            matrixRGB[:, :, 0] = matrix[:, :, lowRed:highRed].sum(axis=2)
+            matrixRGB[:, :, 1] = matrix[:, :, lowGreen:highGreen].sum(axis=2)
+            matrixRGB[:, :, 2] = matrix[:, :, lowBlue:highBlue].sum(axis=2)
+
+            if globalMaximum:
+                matrixRGB = (matrixRGB / np.max(matrixRGB)) * 255
+
+            else:
+                maxima = matrixRGB.max(axis=2)
+                maxima = np.dstack((maxima,) * 3)
+                np.seterr(divide='ignore', invalid='ignore')
+                matrixRGB /= maxima
+                matrixRGB[np.isnan(matrixRGB)] = 0
+                matrixRGB *= 255
+
+            matrixRGB = matrixRGB.round(0)
+
+            return matrixRGB
+        except:
+            return None
+
+    def dataToRgbButWith7Arguments(self, data, lowRed, highRed, lowGreen, highGreen, lowBlue, highBlue, globalMaximum=True):
+        width = self.returnWidthImage(data)
+        height = self.returnHeightImage(data)
 
         matrixRGB = np.zeros((height, width, 3))
-        matrix = dataToMatrix(data)
-
-        matrixRGB[:, :, 0] = matrix[:, :, lowRed:highRed].sum(axis=2)
-        matrixRGB[:, :, 1] = matrix[:, :, lowGreen:highGreen].sum(axis=2)
-        matrixRGB[:, :, 2] = matrix[:, :, lowBlue:highBlue].sum(axis=2)
-
-        if globalMaximum:
-            matrixRGB = (matrixRGB / np.max(matrixRGB)) * 255
-
-        else:
-            maxima = matrixRGB.max(axis=2)
-            maxima = np.dstack((maxima,) * 3)
-            np.seterr(divide='ignore', invalid='ignore')
-            matrixRGB /= maxima
-            matrixRGB[np.isnan(matrixRGB)] = 0
-            matrixRGB *= 255
-
-        matrixRGB = matrixRGB.round(0)
-
-        return matrixRGB
-
-    def matrixToRgbButWith7Arguments(self, data, lowRed, highRed, lowGreen, highGreen, lowBlue, highBlue, globalMaximum=True):
-        width = returnWidth(data)
-        height = returnHeight(data)
-
-        matrixRGB = np.zeros((height, width, 3))
-        matrix = dataToMatrix(data)
+        matrix = self.dataToMatrix(data)
 
         matrixRGB[:, :, 0] = matrix[:, :, lowRed:highRed].sum(axis=2)
         matrixRGB[:, :, 1] = matrix[:, :, lowGreen:highGreen].sum(axis=2)
