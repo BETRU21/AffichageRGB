@@ -1,19 +1,19 @@
-import pandas as pd
-from tkinter.filedialog import askopenfile
-import csv
-import os
-import fnmatch
-import time
-import re
 import numpy as np
-
-
-
-
 
 class HyperSpectralImage:
     def __init__(self):
         self.data = []
+        self.wavelength = []
+
+    def addWavelength(self, wavelength):
+        self.wavelength = np.array(wavelength)
+
+    def deleteWavelength(self):
+        self.wavelength = []
+
+    def returnWaveNumber(self, laser):
+        waveNumber = ((1 / laser) - (1 / self.wavelength)) * 10 ** 7
+        return waveNumber.round(0)
 
     def addSpectrumToData(self, x, y, spectrum):
         self.data.append(((x, y), spectrum))
@@ -23,14 +23,14 @@ class HyperSpectralImage:
 
     def deleteSpecificSpectrumInData(self, x, y):
         spectrumFound = False
-        for i, item in enumerate(data):
+        for i, item in enumerate(self.data):
             if item[0] == (x, y):
                 del self.data[i]
                 spectrumFound = True
 
         return spectrumFound
 
-    def returnSpectrum(self, x, y):
+    def returnSpectrum(self, x, y, data):
         spectrum = None
         for item in data:
             if item[0] == (x, y):
@@ -58,11 +58,11 @@ class HyperSpectralImage:
         try:
             return len(data[0][1])
 
-        except Exception as e:
-            print(f'ERROR : {e}')
+        except:
+            return None
 
     def returnSpectrumRange(self, data):
-        return round(abs(data[0] - data[-1]))
+        return round(abs(data[0][1][0] - data[0][1][-1]))
 
     def dataToMatrix(self, data):
         width = returnWidthImage(data)
@@ -71,7 +71,7 @@ class HyperSpectralImage:
         matrixData = np.zeros((height, width, spectrumLen))
 
         for item in data:
-            matrixData[item[0][1], item[0][0], :] = item[1]
+            matrixData[item[0][1], item[0][0], :] = np.array(item[1])
 
         return matrixData
 
