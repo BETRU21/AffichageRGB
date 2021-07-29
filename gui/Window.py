@@ -17,7 +17,6 @@ import fnmatch
 import time
 import re
 
-from controller.controller import control
 
 application_path = os.path.abspath("")
 
@@ -28,6 +27,7 @@ else:
     pass
 
 UiPath = os.path.dirname(os.path.realpath(__file__)) + '{0}Window.ui'.format(os.sep)
+print(UiPath)
 Ui_MainWindow, QtBaseClass = uic.loadUiType(UiPath)
 
 class Window(QMainWindow, Ui_MainWindow):
@@ -98,8 +98,6 @@ class Window(QMainWindow, Ui_MainWindow):
                 self.update_spectrum_plot()
         except Exception:
             pass
-
-
 
 
     def set_range_to_wave(self, minWaveLength, maxWaveLength, rangeLen):  # GUI
@@ -187,6 +185,8 @@ class Window(QMainWindow, Ui_MainWindow):
         # self.create_matrix_rgb()
         # self.matrixRGB_replace()
         self.pb_search.setEnabled(False)
+
+        return self.folderPath
 
 
 
