@@ -18,17 +18,17 @@ class HyperSpectralImage:
     def deleteWavelength(self):
         self.wavelength = []
 
-    def returnWaveNumber(self, laser):
+    def WaveNumber(self, laser):
         waveNumber = ((1 / laser) - (1 / self.wavelength)) * 10 ** 7
         return waveNumber.round(0)
 
-    def addSpectrumToData(self, x, y, spectrum):
+    def addSpectrum(self, x, y, spectrum):
         self.data.append(Pixel(x, y, spectrum))
 
-    def deleteAllSpectrumInData(self):
+    def deleteSpectrum(self):
         self.data = []
 
-    def returnSpectrum(self, x, y, data):
+    def Spectrum(self, x, y, data):
         spectrum = None
         for item in data:
             if item.x == x:
