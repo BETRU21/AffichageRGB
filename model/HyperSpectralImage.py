@@ -94,6 +94,7 @@ class HyperSpectralImage:
             lowBlue = int(spectrumLen * (2 / 3))
             highBlue = int(spectrumLen)
 
+
             matrixRGB = np.zeros((height, width, 3))
             matrix = self.dataToMatrix(data)
 
@@ -118,28 +119,42 @@ class HyperSpectralImage:
         except:
             return None
 
-    def dataToRgbButWith7Arguments(self, data, lowRed, highRed, lowGreen, highGreen, lowBlue, highBlue, globalMaximum=True):
-        width = self.returnWidthImage(data)
-        height = self.returnHeightImage(data)
+    def dataToRgbWithColorValuesArgument(self, data, colorValues, globalMaximum=True):
+        try:
+            width = self.returnWidthImage(data)
+            height = self.returnHeightImage(data)
+            spectrumLen = self.returnSpectrumLen(data)
 
-        matrixRGB = np.zeros((height, width, 3))
-        matrix = self.dataToMatrix(data)
+            lowRed = round(colorValues[0] / 255 * spectrumLen)
+            highRed = round(colorValues[1] / 255 * spectrumLen)
+            lowGreen = round(colorValues[2] / 255 * spectrumLen)
+            highGreen = round(colorValues[3] / 255 * spectrumLen)
+            lowBlue = round(colorValues[4] / 255 * spectrumLen)
+            highBlue = round(colorValues[5] / 255 * spectrumLen)
 
-        matrixRGB[:, :, 0] = matrix[:, :, lowRed:highRed].sum(axis=2)
-        matrixRGB[:, :, 1] = matrix[:, :, lowGreen:highGreen].sum(axis=2)
-        matrixRGB[:, :, 2] = matrix[:, :, lowBlue:highBlue].sum(axis=2)
 
-        if globalMaximum:
-            matrixRGB = (matrixRGB / np.max(matrixRGB)) * 255
 
-        else:
-            maxima = matrixRGB.max(axis=2)
-            maxima = np.dstack((maxima,) * 3)
-            np.seterr(divide='ignore', invalid='ignore')
-            matrixRGB /= maxima
-            matrixRGB[np.isnan(matrixRGB)] = 0
-            matrixRGB *= 255
 
-        matrixRGB = matrixRGB.round(0)
+            matrixRGB = np.zeros((height, width, 3))
+            matrix = self.dataToMatrix(data)
 
-        return matrixRGB
+            matrixRGB[:, :, 0] = matrix[:, :, lowRed:highRed].sum(axis=2)
+            matrixRGB[:, :, 1] = matrix[:, :, lowGreen:highGreen].sum(axis=2)
+            matrixRGB[:, :, 2] = matrix[:, :, lowBlue:highBlue].sum(axis=2)
+
+            if globalMaximum:
+                matrixRGB = (matrixRGB / np.max(matrixRGB)) * 255
+
+            else:
+                maxima = matrixRGB.max(axis=2)
+                maxima = np.dstack((maxima,) * 3)
+                np.seterr(divide='ignore', invalid='ignore')
+                matrixRGB /= maxima
+                matrixRGB[np.isnan(matrixRGB)] = 0
+                matrixRGB *= 255
+
+            matrixRGB = matrixRGB.round(0)
+
+            return matrixRGB
+        except:
+            return None
