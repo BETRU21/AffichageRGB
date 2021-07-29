@@ -244,8 +244,6 @@ class TestHyperSpectralImage(unittest.TestCase):
 		testMatrix = (testMatrix / np.max(testMatrix)) * 255
 		testMatrix = testMatrix.round(0)
 
-		print(testMatrix)
-
 		matrix = HSI.dataToRGB(HSI.data)
 		equality = np.equal(matrix, testMatrix)
 		result = equality.all()
