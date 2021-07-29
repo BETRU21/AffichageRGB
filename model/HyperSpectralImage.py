@@ -1,9 +1,16 @@
 import numpy as np
+from typing import NamedTuple
+
+class Pixel(NamedTuple):
+    x: int=None
+    y: int=None
+    spectrum: object=None
 
 class HyperSpectralImage:
-    def __init__(self):
+    def __init__(self, averageMultipleSpectra=True):
         self.data = []
         self.wavelength = []
+        self.averageMultipleSpectra = averageMultipleSpectra
 
     def addWavelength(self, wavelength):
         self.wavelength = np.array(wavelength)
@@ -16,52 +23,44 @@ class HyperSpectralImage:
         return waveNumber.round(0)
 
     def addSpectrumToData(self, x, y, spectrum):
-        self.data.append(((x, y), spectrum))
+        self.data.append(Pixel(x, y, spectrum))
 
     def deleteAllSpectrumInData(self):
         self.data = []
 
-    def deleteSpecificSpectrumInData(self, x, y):
-        spectrumFound = False
-        for i, item in enumerate(self.data):
-            if item[0] == (x, y):
-                del self.data[i]
-                spectrumFound = True
-
-        return spectrumFound
-
     def returnSpectrum(self, x, y, data):
         spectrum = None
         for item in data:
-            if item[0] == (x, y):
-                spectrum = item[1]
+            if item.x == x:
+                if item.y == y:
+                    spectrum = item.spectrum
 
         return spectrum
 
     def returnWidthImage(self, data):
         width = -1
         for item in data:
-            if item[0][0] > width:
-                width = item[0][0]
+            if item.x > width:
+                width = item.x
 
         return width + 1
 
     def returnHeightImage(self, data):
         height = -1
         for item in data:
-            if item[0][1] > height:
-                height = item[0][1]
+            if item.y > height:
+                height = item.y
 
         return height + 1
 
-    def returnSpectrumLen(self, data): # On s'en fout duquel c'est obligé d`être la même longueur
+    def returnSpectrumLen(self, data): # Maximum spectral point
         try:
-            return len(data[0][1])
+            return len(data[0].spectrum)
 
         except:
             return None
 
-    def returnSpectrumRange(self, wavelength):
+    def returnSpectrumRange(self, wavelength): # cherchef min et max avant
         try:
             return round(abs(wavelength[-1] - wavelength[0]))
         except:
@@ -75,51 +74,13 @@ class HyperSpectralImage:
             matrixData = np.zeros((height, width, spectrumLen))
 
             for item in data:
-                matrixData[item[0][1], item[0][0], :] = np.array(item[1])
+                matrixData[item.y, item.x, :] = np.array(item.spectrum)
 
             return matrixData
         except:
             return None
 
-    def dataToRGB(self, data, globalMaximum=True):
-        try:
-            width = self.returnWidthImage(data)
-            height = self.returnHeightImage(data)
-            spectrumLen = self.returnSpectrumLen(data)
-
-            lowRed = 0
-            highRed = int(spectrumLen / 3)
-            lowGreen = int(spectrumLen / 3)
-            highGreen = int(spectrumLen * (2 / 3))
-            lowBlue = int(spectrumLen * (2 / 3))
-            highBlue = int(spectrumLen)
-
-
-            matrixRGB = np.zeros((height, width, 3))
-            matrix = self.dataToMatrix(data)
-
-            matrixRGB[:, :, 0] = matrix[:, :, lowRed:highRed].sum(axis=2)
-            matrixRGB[:, :, 1] = matrix[:, :, lowGreen:highGreen].sum(axis=2)
-            matrixRGB[:, :, 2] = matrix[:, :, lowBlue:highBlue].sum(axis=2)
-
-            if globalMaximum:
-                matrixRGB = (matrixRGB / np.max(matrixRGB)) * 255
-
-            else:
-                maxima = matrixRGB.max(axis=2)
-                maxima = np.dstack((maxima,) * 3)
-                np.seterr(divide='ignore', invalid='ignore')
-                matrixRGB /= maxima
-                matrixRGB[np.isnan(matrixRGB)] = 0
-                matrixRGB *= 255
-
-            matrixRGB = matrixRGB.round(0)
-
-            return matrixRGB
-        except:
-            return None
-
-    def dataToRgbWithColorValuesArgument(self, data, colorValues, globalMaximum=True):
+    def dataToRGB(self, data, colorValues, globalMaximum=True): # color value /1 rel
         try:
             width = self.returnWidthImage(data)
             height = self.returnHeightImage(data)
@@ -131,9 +92,6 @@ class HyperSpectralImage:
             highGreen = round(colorValues[3] / 255 * spectrumLen)
             lowBlue = round(colorValues[4] / 255 * spectrumLen)
             highBlue = round(colorValues[5] / 255 * spectrumLen)
-
-
-
 
             matrixRGB = np.zeros((height, width, 3))
             matrix = self.dataToMatrix(data)
