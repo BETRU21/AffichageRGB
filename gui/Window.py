@@ -156,6 +156,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
         if self.doSliderPositionAreInitialize:
             try:
+                self.current_slider_value()
                 self.update_spectrum_plot()
             except:
                 pass
@@ -172,7 +173,14 @@ class Window(QMainWindow, Ui_MainWindow):
         #     pass
 
     def current_slider_value(self):
-        pass
+        lowRedValue = self.dSlider_red.get_left_thumb_value()
+        highRedValue = self.dSlider_red.get_right_thumb_value()
+        lowGreenValue = self.dSlider_green.get_left_thumb_value()
+        highGreenValue = self.dSlider_green.get_right_thumb_value()
+        lowBlueValue = self.dSlider_blue.get_left_thumb_value()
+        highBlueValue = self.dSlider_blue.get_right_thumb_value()
+        print([lowRedValue, highRedValue, lowGreenValue, highGreenValue, lowBlueValue, highBlueValue])
+        return [lowRedValue, highRedValue, lowGreenValue, highGreenValue, lowBlueValue, highBlueValue]
 
 
 
