@@ -1,6 +1,14 @@
 import numpy as np
 from typing import NamedTuple
 
+import pandas as pd
+from tkinter.filedialog import askopenfile
+import csv
+import os
+import fnmatch
+import matplotlib.pyplot as mpl
+import re
+
 class Pixel(NamedTuple):
     x: int=None
     y: int=None
@@ -11,7 +19,7 @@ class HyperSpectralImage:
         self.data = []
         self.wavelength = []
 
-    def addWavelength(self, wavelength):
+    def setWavelength(self, wavelength):
         self.wavelength = np.array(wavelength)
 
     def deleteWavelength(self):
@@ -79,15 +87,17 @@ class HyperSpectralImage:
             for item in data:
                 matrixData[item.y, item.x, :] = np.array(item.spectrum)
 
+
             return matrixData
         except:
             return None
 
-    def matrixRGB(self, data, colorValues, globalMaximum=True): # color value /1 rel
+    def matrixRGB(self, data, colorValues, globalMaximum=True):
         try:
             width = self.widthImage(data)
             height = self.heightImage(data)
             spectrumLen = self.spectrumLen(data)
+
 
             lowRed = round(colorValues[0] * spectrumLen)
             highRed = round(colorValues[1] * spectrumLen)
@@ -96,12 +106,14 @@ class HyperSpectralImage:
             lowBlue = round(colorValues[4] * spectrumLen)
             highBlue = round(colorValues[5] * spectrumLen)
 
+
             matrixRGB = np.zeros((height, width, 3))
             matrix = self.matrixData(data)
 
             matrixRGB[:, :, 0] = matrix[:, :, lowRed:highRed].sum(axis=2)
             matrixRGB[:, :, 1] = matrix[:, :, lowGreen:highGreen].sum(axis=2)
             matrixRGB[:, :, 2] = matrix[:, :, lowBlue:highBlue].sum(axis=2)
+
 
             if globalMaximum:
                 matrixRGB = (matrixRGB / np.max(matrixRGB)) * 255
@@ -115,28 +127,60 @@ class HyperSpectralImage:
                 matrixRGB *= 255
 
             matrixRGB = matrixRGB.round(0)
-
             return matrixRGB
         except:
             return None
 
+    def listNameOfFiles(directory, extension="csv") -> list:
+        foundFiles = []
+        for file in os.listdir(directory):
+            if fnmatch.fnmatch(file, f'*.{extension}'):
+                foundFiles.append(file)
+        return foundFiles
+
     def loadData(self, path):
-        sortedPaths = (self.listNameOfFiles(path))
-        for i, name in enumerate(sortedPaths):
+        DoGetWaveLength = False
+        foundFiles = []
+        for file in os.listdir(path):
+            if fnmatch.fnmatch(file, f'*.csv'):
+                foundFiles.append(file)
+
+        sortedPaths = foundFiles
+        for name in sortedPaths:
             # Find the position
-            matchObj = re.match("\\D*?(\\d+)\\D*?(\\d+)\\D*?", name)
-            if matchObj:
-                posX = int(matchObj.group(1))
-                posY = int(matchObj.group(2))
+            matchCoords = re.match("\\D*?(\\d+)\\D*?(\\d+)\\D*?", name)
+            if matchCoords:
+                posX = int(matchCoords.group(1))
+                posY = int(matchCoords.group(2))
 
                 # Open file and put in the data
                 fich = open(path + '/' + name, "r")
-                test_str = list(fich)[14:]
+                test_str = list(fich)
                 fich.close()
+                xAxis = []
                 spectrum = []
                 for j in test_str:
                     elem_str = j.replace("\n", "")
                     elem = elem_str.split(",")
                     spectrum.append(float(elem[1]))
-                    self.HSI.addSpectrum(posX, posY, spectrum)
+
+                    if DoGetWaveLength == False:
+                        elem_str = j.replace("\n", "")
+                        elem = elem_str.split(",")
+                        xAxis.append(float(elem[0]))
+                        self.setWavelength(xAxis)
+                DoGetWaveLength = True
+                self.addSpectrum(posX, posY, spectrum)
+            # matchBackground = re.match(".*?(_background)\\D*", name)
+            # if matchBackground:
+            #     fich = open(path + '/' + name, "r")
+            #     test_str = list(fich)[14:]
+            #     fich.close()
+            #     xAxis = []
+            #     for j in test_str:
+            #         elem_str = j.replace("\n", "")
+            #         elem = elem_str.split(",")
+            #         xAxis.append(float(elem[1]))
+            #         self.setWavelength(xAxis)
+
 

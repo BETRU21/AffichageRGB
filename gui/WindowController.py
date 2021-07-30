@@ -17,6 +17,8 @@ import fnmatch
 import time
 import re
 
+import pyqtgraph as pg
+
 
 application_path = os.path.abspath("")
 
@@ -43,8 +45,8 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         self.doSliderPositionAreInitialize = False
         self.folderpath = ""
 
-        self.mousePositionX = None
-        self.mousePositionY = None
+        self.mousePositionX = 0
+        self.mousePositionY = 0
 
 
         self.connect_widgets()
@@ -65,11 +67,7 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         self.sb_highBlue.valueChanged.connect(self.update_slider_status)
         self.sb_lowBlue.valueChanged.connect(self.update_slider_status)
 
-        self.pb_print.clicked.connect(self.signalTest)
-
-    def signalTest(self):
-        text = self.appController.get_text()
-        self.print_test(text)
+        self.graph_rgb.scene().sigMouseMoved.connect(self.mouse_moved)
 
     def create_plot_rgb(self):
         self.graph_rgb.clear()
@@ -105,7 +103,9 @@ class WindowControl(QMainWindow, Ui_MainWindow):
             else:
                 self.mousePositionX = positionX
                 self.mousePositionY = positionY
-                self.update_spectrum_plot()
+                matrixData = self.appController.matrixData()
+                waves = self.appController.waves()
+                self.update_spectrum_plot(waves, matrixData)
         except Exception:
             pass
 
@@ -144,8 +144,11 @@ class WindowControl(QMainWindow, Ui_MainWindow):
 
         if self.doSliderPositionAreInitialize:
             try:
-                self.current_slider_value()
-                self.update_spectrum_plot()
+                matrixRGB = self.appController.matrixRGB()
+                matrixData = self.appController.matrixData()
+                waves = self.appController.waves()
+                self.update_rgb_plot(matrixRGB)
+                self.update_spectrum_plot(waves, matrixData)
             except:
                 pass
         else:
@@ -158,7 +161,6 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         highGreenValue = self.dSlider_green.get_right_thumb_value() / 1024
         lowBlueValue = self.dSlider_blue.get_left_thumb_value() / 1024
         highBlueValue = self.dSlider_blue.get_right_thumb_value() / 1024
-        print([lowRedValue, highRedValue, lowGreenValue, highGreenValue, lowBlueValue, highBlueValue])
         return [lowRedValue, highRedValue, lowGreenValue, highGreenValue, lowBlueValue, highBlueValue]
 
 
@@ -167,9 +169,17 @@ class WindowControl(QMainWindow, Ui_MainWindow):
 
     def select_save_folder(self):
         self.folderPath = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
-        self.GotFolderPath()
-        # self.pb_search.setEnabled(False)
-        return self.folderPath
+        matrixRGB = self.appController.loadData(self.folderPath)
+        matrixData = self.appController.matrixData()
+        waves = self.appController.waves()
+
+        self.create_plot_rgb()
+
+        self.create_plot_spectrum()
+
+        self.update_rgb_plot(matrixRGB)
+
+        self.pb_search.setEnabled(False)
 
 
 
@@ -184,21 +194,22 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         # Set the maximum to see the RGB limits and the spectrum clearly
         try:
             maximum = max(matrixData[self.mousePositionY, self.mousePositionX, :])
-            minimum = min(matrixdata[self.mousePositionY, self.mousePositionX, :]) - 1
-        except Exception:
+            minimum = min(matrixData[self.mousePositionY, self.mousePositionX, :]) - 1
+        except Exception as e:
             maximum = 1
             minimum = 0
 
+
         wavesLen = len(waves)
-        colorValues = current_slider_value()
+        colorValues = self.current_slider_value()
 
         # Set the position of the RGB limits
         lowRed = int( colorValues[0] * wavesLen )
-        highRed = int( colorValues[1] * wavesLen )
+        highRed = int( colorValues[1] * wavesLen - 1 )
         lowGreen = int( colorValues[2] * wavesLen )
-        highGreen = int( colorValues[3] * wavesLen )
+        highGreen = int( colorValues[3] * wavesLen - 1 )
         lowBlue = int( colorValues[4] * wavesLen )
-        highBlue = int( colorValues[5] * wavesLen )
+        highBlue = int( colorValues[5] * wavesLen - 1 )
 
         redRange = np.full(wavesLen, minimum)
         redRange[lowRed] = maximum
@@ -212,12 +223,14 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         blueRange[lowBlue] = maximum
         blueRange[highBlue] = maximum
 
+        spectrum = matrixData[self.mousePositionY, self.mousePositionX, :]
+
         self.plotRedRange.setData(waves, redRange, pen=(255, 0, 0))
         self.plotGreenRange.setData(waves, greenRange, pen=(0, 255, 0))
         self.plotBlueRange.setData(waves, blueRange, pen=(0, 0, 255))
         self.plotBlack.setData(waves, np.full(wavesLen, minimum), pen=(0, 0, 0))
+        self.plotSpectrum.setData(waves, spectrum)
 
-        self.plotSpectrum.setData(waves, matrixData[self.mousePositionY, self.mousePositionX, :])
 
     def GotFolderPath(self):
         pass

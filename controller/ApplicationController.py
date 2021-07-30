@@ -6,7 +6,6 @@ from model.HyperSpectralImage import HyperSpectralImage
 
 class AppControl():
     def __init__(self):
-        print("hey")
         self.HSI = HyperSpectralImage()
         self.windowController = None
 
@@ -17,16 +16,26 @@ class AppControl():
     def run(self, path):
         pass
 
-    def listNameOfFiles(self, directory: str, extension="csv") -> list:
-        """Return a list of file in a directory."""
-        foundFiles = []
-        for file in os.listdir(directory):
-            if fnmatch.fnmatch(file, f'*.{extension}'):
-                foundFiles.append(file)
-        return foundFiles
+    def matrixData(self):
+        matrixData = self.HSI.matrixData(self.HSI.data)
+        return matrixData
+
+    def matrixRGB(self):
+        colorValues = self.windowController.current_slider_value()
+        matrixRGB = self.HSI.matrixRGB(self.HSI.data, colorValues)
+        return matrixRGB
+
+    def waves(self):
+        waves = self.HSI.wavelength
+        return waves
 
     def loadData(self, path):
-        pass
+        self.HSI.loadData(path)
+        colorValues = self.windowController.current_slider_value()
+
+        matrixRGB = self.HSI.matrixRGB(self.HSI.data, colorValues)
+        return matrixRGB
+
 
 
 

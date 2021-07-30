@@ -27,10 +27,10 @@ class TestHyperSpectralImage(unittest.TestCase):
 		HSI = HyperSpectralImage()
 		self.assertEqual(len(HSI.wavelength), 0)
 
-	def testAddWavelength(self):
+	def testSetWavelength(self):
 		HSI = HyperSpectralImage()
 		wavelength = [785, 786, 788, 789]
-		HSI.addWavelength(wavelength)
+		HSI.setWavelength(wavelength)
 		equality = np.equal(HSI.wavelength, np.array([785, 786, 788, 789]))
 		result = equality.all()
 		self.assertTrue(result)
@@ -39,7 +39,7 @@ class TestHyperSpectralImage(unittest.TestCase):
 		HSI = HyperSpectralImage()
 		self.assertEqual(len(HSI.wavelength), 0)
 		wavelength =  [785, 786, 788, 789]
-		HSI.addWavelength(wavelength)
+		HSI.setWavelength(wavelength)
 		self.assertEqual(len(HSI.wavelength), 4)
 		HSI.deleteWavelength()
 		self.assertEqual(len(HSI.wavelength), 0)
@@ -47,7 +47,7 @@ class TestHyperSpectralImage(unittest.TestCase):
 	def testReturnWaveNumber(self):
 		HSI = HyperSpectralImage()
 		wavelength = [785, 786, 788, 789]
-		HSI.addWavelength(wavelength)
+		HSI.setWavelength(wavelength)
 		laserWaveLength = 785
 		waveNumber = HSI.WaveNumber(laserWaveLength)
 		equality = np.equal(waveNumber, np.array([0., 16., 48., 65.]))
@@ -140,7 +140,7 @@ class TestHyperSpectralImage(unittest.TestCase):
 	def testReturnSpectrumRange(self):
 		HSI = HyperSpectralImage()
 		wavelength = [785, 786, 788, 789]
-		HSI.addWavelength(wavelength)
+		HSI.setWavelength(wavelength)
 		spectrumRange = HSI.spectrumRange(HSI.wavelength)
 		self.assertEqual(spectrumRange, 4)
 
