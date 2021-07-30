@@ -119,3 +119,24 @@ class HyperSpectralImage:
             return matrixRGB
         except:
             return None
+
+    def loadData(self, path):
+        sortedPaths = (self.listNameOfFiles(path))
+        for i, name in enumerate(sortedPaths):
+            # Find the position
+            matchObj = re.match("\\D*?(\\d+)\\D*?(\\d+)\\D*?", name)
+            if matchObj:
+                posX = int(matchObj.group(1))
+                posY = int(matchObj.group(2))
+
+                # Open file and put in the data
+                fich = open(path + '/' + name, "r")
+                test_str = list(fich)[14:]
+                fich.close()
+                spectrum = []
+                for j in test_str:
+                    elem_str = j.replace("\n", "")
+                    elem = elem_str.split(",")
+                    spectrum.append(float(elem[1]))
+                    self.HSI.addSpectrum(posX, posY, spectrum)
+

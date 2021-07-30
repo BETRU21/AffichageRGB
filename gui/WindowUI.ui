@@ -6,14 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>636</width>
-    <height>535</height>
+    <width>643</width>
+    <height>528</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="autoFillBackground">
+   <bool>true</bool>
+  </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="autoFillBackground">
+    <bool>true</bool>
+   </property>
    <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
      <rect>
@@ -42,12 +48,15 @@
               <string notr="true">background-color: rgb(255, 121, 121);</string>
              </property>
              <property name="maximum">
-              <number>255</number>
+              <number>1000</number>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QRangeSlider" name="dSlider_red">
+             <property name="maximum">
+              <number>1024</number>
+             </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -59,10 +68,10 @@
               <string notr="true">background-color: rgb(255, 121, 121);</string>
              </property>
              <property name="maximum">
-              <number>255</number>
+              <number>1000</number>
              </property>
              <property name="value">
-              <number>85</number>
+              <number>341</number>
              </property>
             </widget>
            </item>
@@ -76,15 +85,18 @@
               <string notr="true">background-color: rgb(125, 231, 106);</string>
              </property>
              <property name="maximum">
-              <number>255</number>
+              <number>1024</number>
              </property>
              <property name="value">
-              <number>86</number>
+              <number>342</number>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QRangeSlider" name="dSlider_green">
+             <property name="maximum">
+              <number>1024</number>
+             </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -96,10 +108,10 @@
               <string notr="true">background-color: rgb(125, 231, 106);</string>
              </property>
              <property name="maximum">
-              <number>255</number>
+              <number>1024</number>
              </property>
              <property name="value">
-              <number>170</number>
+              <number>682</number>
              </property>
             </widget>
            </item>
@@ -113,15 +125,18 @@
               <string notr="true">background-color: rgb(138, 173, 255);</string>
              </property>
              <property name="maximum">
-              <number>255</number>
+              <number>1024</number>
              </property>
              <property name="value">
-              <number>171</number>
+              <number>683</number>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QRangeSlider" name="dSlider_blue">
+             <property name="maximum">
+              <number>1024</number>
+             </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -133,14 +148,28 @@
               <string notr="true">background-color: rgb(138, 173, 255);</string>
              </property>
              <property name="maximum">
-              <number>255</number>
+              <number>1024</number>
              </property>
              <property name="value">
-              <number>255</number>
+              <number>1024</number>
              </property>
             </widget>
            </item>
           </layout>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cmb_wave">
+           <item>
+            <property name="text">
+             <string>WaveNumber</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>WaveLength</string>
+            </property>
+           </item>
+          </widget>
          </item>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -179,7 +208,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>636</width>
+     <width>643</width>
      <height>21</height>
     </rect>
    </property>
@@ -196,7 +225,7 @@
   <customwidget>
    <class>QRangeSlider</class>
    <extends>QSlider</extends>
-   <header>gui.widgets.QRangeSlider</header>
+   <header>/gui/widgets/QRangeSlider.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
