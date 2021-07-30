@@ -7,10 +7,9 @@ class Pixel(NamedTuple):
     spectrum: object=None
 
 class HyperSpectralImage:
-    def __init__(self, averageMultipleSpectra=True):
+    def __init__(self):
         self.data = []
         self.wavelength = []
-        self.averageMultipleSpectra = averageMultipleSpectra
 
     def addWavelength(self, wavelength):
         self.wavelength = np.array(wavelength)
@@ -23,12 +22,13 @@ class HyperSpectralImage:
         return waveNumber.round(0)
 
     def addSpectrum(self, x, y, spectrum):
-        self.data.append(Pixel(x, y, spectrum))
+        self.data.append(Pixel(x, y, spectrum)) 
+
 
     def deleteSpectrum(self):
         self.data = []
 
-    def Spectrum(self, x, y, data):
+    def spectrum(self, x, y, data):
         spectrum = None
         for item in data:
             if item.x == x:
@@ -37,7 +37,7 @@ class HyperSpectralImage:
 
         return spectrum
 
-    def returnWidthImage(self, data):
+    def widthImage(self, data):
         width = -1
         for item in data:
             if item.x > width:
@@ -45,7 +45,7 @@ class HyperSpectralImage:
 
         return width + 1
 
-    def returnHeightImage(self, data):
+    def heightImage(self, data):
         height = -1
         for item in data:
             if item.y > height:
@@ -53,24 +53,24 @@ class HyperSpectralImage:
 
         return height + 1
 
-    def returnSpectrumLen(self, data): # Maximum spectral point
+    def spectrumLen(self, data): # Maximum spectral point
         try:
             return len(data[0].spectrum)
 
         except:
             return None
 
-    def returnSpectrumRange(self, wavelength): # cherchef min et max avant
+    def spectrumRange(self, wavelength): # cherchef min et max avant
         try:
             return round(abs(wavelength[-1] - wavelength[0]))
         except:
             return None
 
-    def dataToMatrix(self, data):
+    def matrixData(self, data):
         try:
-            width = self.returnWidthImage(data)
-            height = self.returnHeightImage(data)
-            spectrumLen = self.returnSpectrumLen(data)
+            width = self.widthImage(data)
+            height = self.heightImage(data)
+            spectrumLen = self.spectrumLen(data)
             matrixData = np.zeros((height, width, spectrumLen))
 
             for item in data:
@@ -80,11 +80,11 @@ class HyperSpectralImage:
         except:
             return None
 
-    def dataToRGB(self, data, colorValues, globalMaximum=True): # color value /1 rel
+    def matrixRGB(self, data, colorValues, globalMaximum=True): # color value /1 rel
         try:
-            width = self.returnWidthImage(data)
-            height = self.returnHeightImage(data)
-            spectrumLen = self.returnSpectrumLen(data)
+            width = self.widthImage(data)
+            height = self.heightImage(data)
+            spectrumLen = self.spectrumLen(data)
 
             lowRed = round(colorValues[0] / 255 * spectrumLen)
             highRed = round(colorValues[1] / 255 * spectrumLen)
@@ -94,7 +94,7 @@ class HyperSpectralImage:
             highBlue = round(colorValues[5] / 255 * spectrumLen)
 
             matrixRGB = np.zeros((height, width, 3))
-            matrix = self.dataToMatrix(data)
+            matrix = self.matrixData(data)
 
             matrixRGB[:, :, 0] = matrix[:, :, lowRed:highRed].sum(axis=2)
             matrixRGB[:, :, 1] = matrix[:, :, lowGreen:highGreen].sum(axis=2)

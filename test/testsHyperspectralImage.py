@@ -16,7 +16,7 @@ class TestHyperSpectralImage(unittest.TestCase):
 		self.assertIsNotNone(HyperSpectralImage)
 
 	def testCreateHSIInstance(self):
-		HSI = HyperSpectralImage(False)
+		HSI = HyperSpectralImage()
 		self.assertIsNotNone(HSI)
 
 	def testDefaultDataIsEmpty(self):
@@ -66,35 +66,6 @@ class TestHyperSpectralImage(unittest.TestCase):
 		self.assertIsInstance(HSI.data[0].y, int)
 		self.assertEqual(len(HSI.data[0].spectrum), 4)
 
-	def testAdd2SpectraToData(self):
-		HSI = HyperSpectralImage()
-		x1 = 15
-		y1 = 64
-		spectrum1 = [50, -1, 0, 69]
-
-		x2 = 2
-		y2 = 3
-		spectrum2 = [-550, 10, 6000000, 2]
-
-		HSI.addSpectrum(x1, y1, spectrum1)
-		HSI.addSpectrum(x2, y2, spectrum2)
-		self.assertEqual(len(HSI.data), 2)
-
-	@unittest.skipIf(skipTests, "Code not finished")
-	def testAdd2SpectraAtTheSameCoords(self):
-		HSI = HyperSpectralImage()
-		x1 = 15
-		y1 = 64
-		spectrum1 = [50, -1, 0, 69]
-
-		x2 = 15
-		y2 = 64
-		spectrum2 = [-550, 10, 6000000, 2]
-
-		HSI.addSpectrum(x1, y1, spectrum1)
-		HSI.addSpectrum(x2, y2, spectrum2)
-		self.assertEqual(len(HSI.data), 2)
-
 	def testDeleteSpectrum(self):
 		HSI = HyperSpectralImage()
 		x = 0
@@ -111,12 +82,12 @@ class TestHyperSpectralImage(unittest.TestCase):
 		y = 0
 		spectrum = [1, 2, 3, 4]
 		HSI.addSpectrum(x, y, spectrum)
-		returnSpectrum = HSI.Spectrum(x, y, HSI.data)
+		returnSpectrum = HSI.spectrum(x, y, HSI.data)
 		self.assertListEqual(returnSpectrum, spectrum)
 
 	def testReturnSpectrumNone(self):
 		HSI = HyperSpectralImage()
-		returnSpectrum = HSI.Spectrum(2, 100, HSI.data)
+		returnSpectrum = HSI.spectrum(2, 100, HSI.data)
 		self.assertIsNone(returnSpectrum)
 
 	def testReturnWidthImage(self):
@@ -128,12 +99,12 @@ class TestHyperSpectralImage(unittest.TestCase):
 		HSI.addSpectrum(2, 0, [13, 14, 15])
 		HSI.addSpectrum(2, 1, [16, 17, 18])
 
-		width = HSI.returnWidthImage(HSI.data)
+		width = HSI.widthImage(HSI.data)
 		self.assertEqual(width, 3)
 
 	def testReturnWidthImageWithNoData(self):
 		HSI = HyperSpectralImage()
-		width = HSI.returnWidthImage(HSI.data)
+		width = HSI.widthImage(HSI.data)
 		self.assertEqual(width, 0)
 
 	def testReturnHeightImage(self):
@@ -145,12 +116,12 @@ class TestHyperSpectralImage(unittest.TestCase):
 		HSI.addSpectrum(2, 0, [13, 14, 15])
 		HSI.addSpectrum(2, 1, [16, 17, 18])
 
-		width = HSI.returnHeightImage(HSI.data)
+		width = HSI.heightImage(HSI.data)
 		self.assertEqual(width, 2)
 
 	def testReturnHeightImageWithNoData(self):
 		HSI = HyperSpectralImage()
-		width = HSI.returnHeightImage(HSI.data)
+		width = HSI.heightImage(HSI.data)
 		self.assertEqual(width, 0)
 
 	def testReturnSpectrumLen(self):
@@ -159,26 +130,26 @@ class TestHyperSpectralImage(unittest.TestCase):
 		y = 0
 		spectrum = [1, 2, 3, 4]
 		HSI.addSpectrum(x, y, spectrum)
-		spectrumLen = HSI.returnSpectrumLen(HSI.data)
+		spectrumLen = HSI.spectrumLen(HSI.data)
 
-	def testReturnSpectrumLen(self):
+	def testReturnSpectrumLenWithNoData(self):
 		HSI = HyperSpectralImage()
-		spectrumLen = HSI.returnSpectrumLen(HSI.data)
+		spectrumLen = HSI.spectrumLen(HSI.data)
 		self.assertIsNone(spectrumLen)
 
 	def testReturnSpectrumRange(self):
 		HSI = HyperSpectralImage()
 		wavelength = [785, 786, 788, 789]
 		HSI.addWavelength(wavelength)
-		spectrumRange = HSI.returnSpectrumRange(HSI.wavelength)
+		spectrumRange = HSI.spectrumRange(HSI.wavelength)
 		self.assertEqual(spectrumRange, 4)
 
 	def testReturnSpectrumRangeNone(self):
 		HSI = HyperSpectralImage()
-		spectrumRange = HSI.returnSpectrumRange(HSI.wavelength)
+		spectrumRange = HSI.spectrumRange(HSI.wavelength)
 		self.assertIsNone(spectrumRange)
 
-	def testDataToMatrix(self):
+	def testMatrixData(self):
 		HSI = HyperSpectralImage()
 		HSI.addSpectrum(0, 0, [1, 2, 3])
 		HSI.addSpectrum(0, 1, [4, 5, 6])
@@ -195,23 +166,23 @@ class TestHyperSpectralImage(unittest.TestCase):
 		testMatrix[0][2] = np.array([13, 14, 15])
 		testMatrix[1][2] = np.array([16, 17, 18])
 
-		matrix = HSI.dataToMatrix(HSI.data)
+		matrix = HSI.matrixData(HSI.data)
 		equality = np.equal(matrix, testMatrix)
 		result = equality.all()
 		self.assertTrue(result)
 
-	def testDataToMatrixNoData(self):
+	def testMatrixDataWithNoData(self):
 		HSI = HyperSpectralImage()
-		matrix = HSI.dataToMatrix(HSI.data)
+		matrix = HSI.matrixData(HSI.data)
 		self.assertIsNone(matrix)
 
-	def testDataToRGB(self):
+	def testMatrixRGB(self):
 		HSI = HyperSpectralImage()
 		HSI.addSpectrum(0, 0, [1, 2, 3, 4, 5, 6])
 		HSI.addSpectrum(0, 1, [7, 8, 9, 10, 11, 12])
 		HSI.addSpectrum(1, 0, [13, 14, 15, 16, 17, 18])
 		HSI.addSpectrum(1, 1, [19, 20, 21, 22, 23, 24])
-		matrix = HSI.dataToRGB(HSI.data, [0, 85, 86, 170, 171, 255])
+		matrix = HSI.matrixRGB(HSI.data, [0, 85, 86, 170, 171, 255])
 
 		testMatrix = np.zeros((2, 2, 3))
 		testMatrix[0][0] = np.array([3, 7, 11])
@@ -225,7 +196,7 @@ class TestHyperSpectralImage(unittest.TestCase):
 		result = equality.all()
 		self.assertTrue(result)
 
-	def testDataToRGBGlobalMaximumFalse(self):
+	def testMatrixRGBGlobalMaximumFalse(self):
 		HSI = HyperSpectralImage()
 		HSI.addSpectrum(0, 0, [1, 2, 3, 4, 5, 6])
 		HSI.addSpectrum(0, 1, [7, 8, 9, 10, 11, 12])
@@ -243,14 +214,14 @@ class TestHyperSpectralImage(unittest.TestCase):
 		testMatrix *= 255
 		testMatrix = testMatrix.round(0)
 
-		matrix = HSI.dataToRGB(HSI.data, [0, 85, 86, 170, 171, 255], globalMaximum=False)
+		matrix = HSI.matrixRGB(HSI.data, [0, 85, 86, 170, 171, 255], globalMaximum=False)
 		equality = np.equal(matrix, testMatrix)
 		result = equality.all()
 		self.assertTrue(result)
 
-	def testDataToRGBNoData(self):
+	def testMatrixRGBWithNoData(self):
 		HSI = HyperSpectralImage()
-		matrix = HSI.dataToRGB(HSI.data, [0, 85, 86, 170, 171, 255])
+		matrix = HSI.matrixRGB(HSI.data, [0, 85, 86, 170, 171, 255])
 		self.assertIsNone(matrix)
 
 if __name__ == "__main__":

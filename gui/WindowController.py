@@ -26,11 +26,11 @@ if sys.platform == "win32":
 else:
     pass
 
-UiPath = os.path.dirname(os.path.realpath(__file__)) + '{0}Window.ui'.format(os.sep)
+UiPath = os.path.dirname(os.path.realpath(__file__)) + '{0}WindowUI.ui'.format(os.sep)
 print(UiPath)
 Ui_MainWindow, QtBaseClass = uic.loadUiType(UiPath)
 
-class Window(QMainWindow, Ui_MainWindow):
+class WindowControl(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
@@ -60,6 +60,11 @@ class Window(QMainWindow, Ui_MainWindow):
         self.sb_lowGreen.valueChanged.connect(self.update_slider_status)
         self.sb_highBlue.valueChanged.connect(self.update_slider_status)
         self.sb_lowBlue.valueChanged.connect(self.update_slider_status)
+
+        self.cmb_set_maximum.currentIndexChanged.connect(self.signal)
+
+    def signal(self):
+        pass
 
     def create_plot_rgb(self):
         self.graph_rgb.clear()
