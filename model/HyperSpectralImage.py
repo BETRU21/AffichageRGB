@@ -53,16 +53,19 @@ class HyperSpectralImage:
 
         return height + 1
 
-    def spectrumLen(self, data): # Maximum spectral point
-        try:
-            return len(data[0].spectrum)
-
-        except:
+    def spectrumLen(self, data):
+        spectrumLen = 0
+        for item in data:
+            if len(item.spectrum) > spectrumLen:
+                spectrumLen = len(item.spectrum)
+        if spectrumLen == 0:
             return None
+        else:
+            return spectrumLen
 
-    def spectrumRange(self, wavelength): # cherchef min et max avant
+    def spectrumRange(self, wavelength):
         try:
-            return round(abs(wavelength[-1] - wavelength[0]))
+            return round(abs(max(wavelength) - min(wavelength)))
         except:
             return None
 
@@ -86,12 +89,12 @@ class HyperSpectralImage:
             height = self.heightImage(data)
             spectrumLen = self.spectrumLen(data)
 
-            lowRed = round(colorValues[0] / 255 * spectrumLen)
-            highRed = round(colorValues[1] / 255 * spectrumLen)
-            lowGreen = round(colorValues[2] / 255 * spectrumLen)
-            highGreen = round(colorValues[3] / 255 * spectrumLen)
-            lowBlue = round(colorValues[4] / 255 * spectrumLen)
-            highBlue = round(colorValues[5] / 255 * spectrumLen)
+            lowRed = round(colorValues[0] * spectrumLen)
+            highRed = round(colorValues[1] * spectrumLen)
+            lowGreen = round(colorValues[2] * spectrumLen)
+            highGreen = round(colorValues[3] * spectrumLen)
+            lowBlue = round(colorValues[4] * spectrumLen)
+            highBlue = round(colorValues[5] * spectrumLen)
 
             matrixRGB = np.zeros((height, width, 3))
             matrix = self.matrixData(data)

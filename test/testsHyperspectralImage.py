@@ -182,7 +182,7 @@ class TestHyperSpectralImage(unittest.TestCase):
 		HSI.addSpectrum(0, 1, [7, 8, 9, 10, 11, 12])
 		HSI.addSpectrum(1, 0, [13, 14, 15, 16, 17, 18])
 		HSI.addSpectrum(1, 1, [19, 20, 21, 22, 23, 24])
-		matrix = HSI.matrixRGB(HSI.data, [0, 85, 86, 170, 171, 255])
+		matrix = HSI.matrixRGB(HSI.data, [0, 1/3, 1/3, 2/3, 2/3, 1])
 
 		testMatrix = np.zeros((2, 2, 3))
 		testMatrix[0][0] = np.array([3, 7, 11])
@@ -214,15 +214,23 @@ class TestHyperSpectralImage(unittest.TestCase):
 		testMatrix *= 255
 		testMatrix = testMatrix.round(0)
 
-		matrix = HSI.matrixRGB(HSI.data, [0, 85, 86, 170, 171, 255], globalMaximum=False)
+		matrix = HSI.matrixRGB(HSI.data, [0, 1/3, 1/3, 2/3, 2/3, 1], globalMaximum=False)
 		equality = np.equal(matrix, testMatrix)
 		result = equality.all()
 		self.assertTrue(result)
 
 	def testMatrixRGBWithNoData(self):
 		HSI = HyperSpectralImage()
-		matrix = HSI.matrixRGB(HSI.data, [0, 85, 86, 170, 171, 255])
+		matrix = HSI.matrixRGB(HSI.data, [0, 1/3, 1/3, 2/3, 2/3, 1])
 		self.assertIsNone(matrix)
+
+	def testFindMaximum(self):
+		HSI = HyperSpectralImage()
+		HSI.addSpectrum(0, 0, [1, 2, 3, 4, 5, 6])
+		HSI.addSpectrum(0, 1, [7, 8, 9, 10, 11, 12])
+		HSI.addSpectrum(1, 0, [13, 14, 15, 16, 17, 18])
+		HSI.addSpectrum(1, 1, [19, 20, 21, 22, 23, 24])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -40,11 +40,11 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         self.maxWaveLength = 255
         self.minWaveLength = 0
         self.doSliderPositionAreInitialize = False
+        self.folderpath = ""
 
 
         self.connect_widgets()
         self.update_slider_status()
-        self.folderpath = ""
 
     def connect_widgets(self):
         self.graph_rgb.scene().sigMouseMoved.connect(self.mouse_moved)
@@ -61,9 +61,10 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         self.sb_highBlue.valueChanged.connect(self.update_slider_status)
         self.sb_lowBlue.valueChanged.connect(self.update_slider_status)
 
-        self.cmb_set_maximum.currentIndexChanged.connect(self.signal)
+        self.cmb_set_maximum.currentIndexChanged.connect(self.signalTest)
 
-    def signal(self):
+    def signalTest(self):
+        # Go print printYo of AppControl
         pass
 
     def create_plot_rgb(self):
@@ -168,22 +169,13 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         else:
             self.doSliderPositionAreInitialize = True
 
-    def update_color(self):  # Controller
-        pass
-        # try:
-        #     self.matrixRGB_replace()
-        #     self.update_rgb_plot()
-        #     self.update_spectrum_plot()
-        # except:
-        #     pass
-
     def current_slider_value(self):
-        lowRedValue = self.dSlider_red.get_left_thumb_value()
-        highRedValue = self.dSlider_red.get_right_thumb_value()
-        lowGreenValue = self.dSlider_green.get_left_thumb_value()
-        highGreenValue = self.dSlider_green.get_right_thumb_value()
-        lowBlueValue = self.dSlider_blue.get_left_thumb_value()
-        highBlueValue = self.dSlider_blue.get_right_thumb_value()
+        lowRedValue = self.dSlider_red.get_left_thumb_value() / 255
+        highRedValue = self.dSlider_red.get_right_thumb_value() / 255
+        lowGreenValue = self.dSlider_green.get_left_thumb_value() / 255
+        highGreenValue = self.dSlider_green.get_right_thumb_value() / 255
+        lowBlueValue = self.dSlider_blue.get_left_thumb_value() / 255
+        highBlueValue = self.dSlider_blue.get_right_thumb_value() / 255
         print([lowRedValue, highRedValue, lowGreenValue, highGreenValue, lowBlueValue, highBlueValue])
         return [lowRedValue, highRedValue, lowGreenValue, highGreenValue, lowBlueValue, highBlueValue]
 
@@ -244,7 +236,14 @@ class WindowControl(QMainWindow, Ui_MainWindow):
             self.plotBlack.setData(self.waves, np.full(len(self.waves), minimum), pen=(0, 0, 0))
 
 
-
+    def update_color(self):  # Controller
+        pass
+        # try:
+        #     self.matrixRGB_replace()
+        #     self.update_rgb_plot()
+        #     self.update_spectrum_plot()
+        # except:
+        #     pass
 
 
 
