@@ -230,8 +230,6 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         self.plotBlueRange.setData(waves, blueRange, pen=(0, 0, 255))
         self.plotBlack.setData(waves, np.full(wavesLen, minimum), pen=(0, 0, 0))
         self.plotSpectrum.setData(waves, spectrum)
-        print("ou ici?")
-
 
     def GotFolderPath(self):
         pass
