@@ -36,6 +36,10 @@ class AppControl():
         matrixRGB = self.HSI.matrixRGB(self.HSI.data, colorValues)
         return matrixRGB
 
+    def spectrum(self, x, y):
+        spectrum = self.HSI.spectrum(x, y, self.HSI.data)
+        return spectrum
+
 
 
 

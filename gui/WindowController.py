@@ -48,6 +48,8 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         self.mousePositionX = 0
         self.mousePositionY = 0
 
+        self.doSliderPositionAreInitialize = False
+
 
         self.connect_widgets()
         self.update_slider_status()
@@ -114,19 +116,19 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         self.sb_lowRed.setValue(self.mapping_on_spinBox(self.dSlider_red.get_left_thumb_value()))
         self.sb_highRed.setValue(self.mapping_on_spinBox(self.dSlider_red.get_right_thumb_value()))
 
-        self.update_color()
+        #self.update_color()
 
     def set_green_range(self):  # GUI
         self.sb_lowGreen.setValue(self.mapping_on_spinBox(self.dSlider_green.get_left_thumb_value()))
         self.sb_highGreen.setValue(self.mapping_on_spinBox(self.dSlider_green.get_right_thumb_value()))
 
-        self.update_color()
+        #self.update_color()
 
     def set_blue_range(self):  # GUI
         self.sb_lowBlue.setValue(self.mapping_on_spinBox(self.dSlider_blue.get_left_thumb_value()))
         self.sb_highBlue.setValue(self.mapping_on_spinBox(self.dSlider_blue.get_right_thumb_value()))
 
-        self.update_color()
+        #self.update_color()
 
     def mapping_on_slider(self, value):  # GUI
         return round(((value - self.minWave)/self.rangeLen) * 1024)
@@ -147,8 +149,9 @@ class WindowControl(QMainWindow, Ui_MainWindow):
                 matrixRGB = self.appController.matrixRGB()
                 matrixData = self.appController.matrixData()
                 waves = self.appController.waves()
-                self.update_rgb_plot(matrixRGB)
                 self.update_spectrum_plot(waves, matrixData)
+                self.update_rgb_plot(matrixRGB)
+
             except:
                 pass
         else:
@@ -174,11 +177,9 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         waves = self.appController.waves()
 
         self.create_plot_rgb()
-
         self.create_plot_spectrum()
-
+        self.update_spectrum_plot(waves, matrixData)
         self.update_rgb_plot(matrixRGB)
-
         self.pb_search.setEnabled(False)
 
 
@@ -192,9 +193,10 @@ class WindowControl(QMainWindow, Ui_MainWindow):
 
     def update_spectrum_plot(self, waves, matrixData):
         # Set the maximum to see the RGB limits and the spectrum clearly
+        spectrum = self.appController.spectrum(self.mousePositionY, self.mousePositionX)
         try:
-            maximum = max(matrixData[self.mousePositionY, self.mousePositionX, :])
-            minimum = min(matrixData[self.mousePositionY, self.mousePositionX, :]) - 1
+            maximum = max(spectrum)
+            minimum = min(spectrum) - 1
         except Exception as e:
             maximum = 1
             minimum = 0
@@ -223,13 +225,12 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         blueRange[lowBlue] = maximum
         blueRange[highBlue] = maximum
 
-        spectrum = matrixData[self.mousePositionY, self.mousePositionX, :]
-
         self.plotRedRange.setData(waves, redRange, pen=(255, 0, 0))
         self.plotGreenRange.setData(waves, greenRange, pen=(0, 255, 0))
         self.plotBlueRange.setData(waves, blueRange, pen=(0, 0, 255))
         self.plotBlack.setData(waves, np.full(wavesLen, minimum), pen=(0, 0, 0))
         self.plotSpectrum.setData(waves, spectrum)
+        print("ou ici?")
 
 
     def GotFolderPath(self):
@@ -238,13 +239,11 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         # Show the matrixRGB
 
     def update_color(self):  # Controller
-        pass
-        # try:
-        #     self.matrixRGB_replace()
-        #     self.update_rgb_plot()
-        #     self.update_spectrum_plot()
-        # except:
-        #     pass
+        matrixRGB = self.appController.loadData(self.folderPath)
+        matrixData = self.appController.matrixData()
+        waves = self.appController.waves()
+        self.update_rgb_plot(matrixRGB)
+        self.update_spectrum_plot(waves, matrixData)
 
     def set_range_to_wave(self):  # GUI
         pass
