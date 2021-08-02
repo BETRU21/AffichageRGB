@@ -1,6 +1,6 @@
+from controller.ApplicationController import AppControl
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from gui.WindowController import WindowControl
-from controller.ApplicationController import AppControl
 import sys
 
 

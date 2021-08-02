@@ -1,12 +1,11 @@
-import numpy as np
-from typing import NamedTuple
-
-import pandas as pd
 from tkinter.filedialog import askopenfile
+import matplotlib.pyplot as mpl
+from typing import NamedTuple
+import pandas as pd
+import numpy as np
+import fnmatch
 import csv
 import os
-import fnmatch
-import matplotlib.pyplot as mpl
 import re
 
 class Pixel(NamedTuple):
@@ -113,7 +112,6 @@ class HyperSpectralImage:
             matrixRGB[:, :, 0] = matrix[:, :, lowRed:highRed].sum(axis=2)
             matrixRGB[:, :, 1] = matrix[:, :, lowGreen:highGreen].sum(axis=2)
             matrixRGB[:, :, 2] = matrix[:, :, lowBlue:highBlue].sum(axis=2)
-
 
             if globalMaximum:
                 matrixRGB = (matrixRGB / np.max(matrixRGB)) * 255

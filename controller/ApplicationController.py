@@ -9,20 +9,13 @@ class AppControl():
         self.HSI = HyperSpectralImage()
         self.windowController = None
 
-    def giveRangeInfo(minWaveLength, maxWaveLength, rangeLen):
-        pass
-        #Window().set_range_to_wave(minWaveLength, maxWaveLength, rangeLen)
-
-    def run(self, path):
-        pass
-
     def matrixData(self):
         matrixData = self.HSI.matrixData(self.HSI.data)
         return matrixData
 
-    def matrixRGB(self):
+    def matrixRGB(self, globalMaximum=True):
         colorValues = self.windowController.current_slider_value()
-        matrixRGB = self.HSI.matrixRGB(self.HSI.data, colorValues)
+        matrixRGB = self.HSI.matrixRGB(self.HSI.data, colorValues, globalMaximum)
         return matrixRGB
 
     def waves(self):
@@ -32,9 +25,6 @@ class AppControl():
     def loadData(self, path):
         self.HSI.loadData(path)
         colorValues = self.windowController.current_slider_value()
-
-        matrixRGB = self.HSI.matrixRGB(self.HSI.data, colorValues)
-        return matrixRGB
 
     def spectrum(self, x, y):
         spectrum = self.HSI.spectrum(x, y, self.HSI.data)

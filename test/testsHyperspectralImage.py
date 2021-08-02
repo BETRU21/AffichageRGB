@@ -1,7 +1,7 @@
+import numpy as np
 import unittest
 import sys
 import os
-import numpy as np
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from model.HyperSpectralImage import HyperSpectralImage

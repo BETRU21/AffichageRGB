@@ -1,24 +1,23 @@
-import os
-from PyQt5 import uic
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow
-from PyQt5.QtGui import QIcon
-import matplotlib.pyplot as plt
-import numpy as np
 from PyQt5.QtCore import pyqtSignal, Qt, QThreadPool, QThread, QTimer
+from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtWidgets import QWidget, QFileDialog
-import ctypes
-import sys
-
-import pandas as pd
-from tkinter.filedialog import askopenfile
-import csv
-import fnmatch
-import time
-import re
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtGui import QIcon
+from PyQt5 import uic
 
 import pyqtgraph as pg
 
+from tkinter.filedialog import askopenfile
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+import fnmatch
+import ctypes
+import time
+import sys
+import csv
+import re
+import os
 
 application_path = os.path.abspath("")
 
@@ -29,7 +28,6 @@ else:
     pass
 
 UiPath = os.path.dirname(os.path.realpath(__file__)) + '{0}WindowUI.ui'.format(os.sep)
-print(UiPath)
 Ui_MainWindow, QtBaseClass = uic.loadUiType(UiPath)
 
 class WindowControl(QMainWindow, Ui_MainWindow):
@@ -40,7 +38,6 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         self.appController = None
 
         self.rangeLen = 1024
-        #self.maxWave = 1024
         self.minWave = 0
         self.doSliderPositionAreInitialize = False
         self.folderpath = ""
@@ -50,11 +47,15 @@ class WindowControl(QMainWindow, Ui_MainWindow):
 
         self.doSliderPositionAreInitialize = False
 
+        self.globalMaximum = True
 
         self.connect_widgets()
         self.update_slider_status()
 
     def connect_widgets(self):
+        self.cmb_wave.currentIndexChanged.connect(self.set_range_to_wave)
+        self.cmb_set_maximum.currentIndexChanged.connect(self.setMaximum)
+
         self.graph_rgb.scene().sigMouseMoved.connect(self.mouse_moved)
         self.pb_search.clicked.connect(self.select_save_folder)
 
@@ -68,8 +69,6 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         self.sb_lowGreen.valueChanged.connect(self.update_slider_status)
         self.sb_highBlue.valueChanged.connect(self.update_slider_status)
         self.sb_lowBlue.valueChanged.connect(self.update_slider_status)
-
-        self.graph_rgb.scene().sigMouseMoved.connect(self.mouse_moved)
 
     def create_plot_rgb(self):
         self.graph_rgb.clear()
@@ -96,8 +95,8 @@ class WindowControl(QMainWindow, Ui_MainWindow):
             valueMax = valueSTR.find(")")
             position = valueSTR[valueMin+1:valueMax]
             position = position.split(",")
-            positionX = int(float(position[1]))
-            positionY = int(float(position[0]))
+            positionY = int(float(position[1]))
+            positionX = int(float(position[0]))
 
             if positionX <= -1 or positionY <= -1:
                 pass
@@ -111,51 +110,67 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         except Exception:
             pass
 
+    def setMaximum(self):
+        if self.cmb_set_maximum.currentIndex() == 0:
+            self.globalMaximum = True
+        else:
+            self.globalMaximum = False
+        self.appController.loadData(self.folderPath)
+        matrixRGB = self.appController.matrixRGB(self.globalMaximum)
+        matrixData = self.appController.matrixData()
+        waves = self.appController.waves()
+        self.update_rgb_plot(matrixRGB)
 
-    def set_red_range(self):  # GUI
+    def set_red_range(self):
         self.sb_lowRed.setValue(self.mapping_on_spinBox(self.dSlider_red.get_left_thumb_value()))
         self.sb_highRed.setValue(self.mapping_on_spinBox(self.dSlider_red.get_right_thumb_value()))
 
-        #self.update_color()
-
-    def set_green_range(self):  # GUI
+    def set_green_range(self):
         self.sb_lowGreen.setValue(self.mapping_on_spinBox(self.dSlider_green.get_left_thumb_value()))
         self.sb_highGreen.setValue(self.mapping_on_spinBox(self.dSlider_green.get_right_thumb_value()))
 
-        #self.update_color()
-
-    def set_blue_range(self):  # GUI
+    def set_blue_range(self):
         self.sb_lowBlue.setValue(self.mapping_on_spinBox(self.dSlider_blue.get_left_thumb_value()))
         self.sb_highBlue.setValue(self.mapping_on_spinBox(self.dSlider_blue.get_right_thumb_value()))
 
-        #self.update_color()
+    def set_range_to_wave(self):
+        waves = self.appController.waves()
+        if self.cmb_wave.currentIndex() == 0:
+            laser = int(self.le_laser.text())
+            waves = ((1 / laser) - (1 / waves)) * 10 ** 7     
 
-    def mapping_on_slider(self, value):  # GUI
+        self.minWave = round(min(waves))
+        self.rangeLen = round(max(waves) - min(waves))
+        self.maxWave = int(max(waves))
+
+        self.sb_highRed.setMaximum(self.maxWave)
+        self.sb_lowRed.setMaximum(self.maxWave-1)
+        self.sb_highGreen.setMaximum(self.maxWave)
+        self.sb_lowGreen.setMaximum(self.maxWave-1)
+        self.sb_highBlue.setMaximum(self.maxWave)
+        self.sb_lowBlue.setMaximum(self.maxWave-1)
+
+        self.sb_highRed.setMinimum(self.minWave)
+        self.sb_lowRed.setMinimum(self.minWave)
+        self.sb_highGreen.setMinimum(self.minWave)
+        self.sb_lowGreen.setMinimum(self.minWave)
+        self.sb_highBlue.setMinimum(self.minWave)
+        self.sb_lowBlue.setMinimum(self.minWave)
+        self.sb_lowRed.setValue(self.minWave)
+
+        self.sb_highRed.setValue(round(self.rangeLen/3) + self.minWave)
+        self.sb_lowGreen.setValue(round(self.rangeLen/3) + self.minWave + 1)
+        self.sb_highGreen.setValue(round((self.rangeLen*(2/3)) + self.minWave))
+        self.sb_lowBlue.setValue(round((self.rangeLen*(2/3)) + self.minWave+1))
+        self.sb_highBlue.setValue(self.maxWave)
+
+        self.update_slider_status()
+
+    def mapping_on_slider(self, value):
         return round(((value - self.minWave)/self.rangeLen) * 1024)
 
-    def mapping_on_spinBox(self, value):  # GUI
+    def mapping_on_spinBox(self, value):
         return round((value/1024) * self.rangeLen+self.minWave)
-
-    def update_slider_status(self):  # GUI
-        self.dSlider_red.set_left_thumb_value(self.mapping_on_slider(self.sb_lowRed.value()))
-        self.dSlider_red.set_right_thumb_value(self.mapping_on_slider(self.sb_highRed.value()))
-        self.dSlider_green.set_left_thumb_value(self.mapping_on_slider(self.sb_lowGreen.value()))
-        self.dSlider_green.set_right_thumb_value(self.mapping_on_slider(self.sb_highGreen.value()))
-        self.dSlider_blue.set_left_thumb_value(self.mapping_on_slider(self.sb_lowBlue.value()))
-        self.dSlider_blue.set_right_thumb_value(self.mapping_on_slider(self.sb_highBlue.value()))
-
-        if self.doSliderPositionAreInitialize:
-            try:
-                matrixRGB = self.appController.matrixRGB()
-                matrixData = self.appController.matrixData()
-                waves = self.appController.waves()
-                self.update_spectrum_plot(waves, matrixData)
-                self.update_rgb_plot(matrixRGB)
-
-            except:
-                pass
-        else:
-            self.doSliderPositionAreInitialize = True
 
     def current_slider_value(self):
         lowRedValue = self.dSlider_red.get_left_thumb_value() / 1024
@@ -166,26 +181,31 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         highBlueValue = self.dSlider_blue.get_right_thumb_value() / 1024
         return [lowRedValue, highRedValue, lowGreenValue, highGreenValue, lowBlueValue, highBlueValue]
 
-
-
-
-
     def select_save_folder(self):
-        self.folderPath = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
-        matrixRGB = self.appController.loadData(self.folderPath)
-        matrixData = self.appController.matrixData()
-        waves = self.appController.waves()
+        if self.le_laser.text() == "":
+            self.error_laser_wavelength()
+        else:
+            try:
+                laser = int(self.le_laser.text())
+                self.folderPath = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
+                self.appController.loadData(self.folderPath)
+                matrixRGB = self.appController.matrixRGB(self.globalMaximum)
+                matrixData = self.appController.matrixData()
+                waves = self.appController.waves()
 
-        self.create_plot_rgb()
-        self.create_plot_spectrum()
-        self.update_spectrum_plot(waves, matrixData)
-        self.update_rgb_plot(matrixRGB)
-        self.pb_search.setEnabled(False)
+                self.create_plot_rgb()
+                self.create_plot_spectrum()
+                self.set_range_to_wave()
+                self.update_spectrum_plot(waves, matrixData)
+                self.update_rgb_plot(matrixRGB)
+                self.pb_search.setEnabled(False)
+            except:
+                self.error_laser_wavelength()
+            
 
-
-
-
-
+    def error_laser_wavelength(self):
+        self.le_laser.setStyleSheet("background-color: rgb(255, 0, 0)")
+        QTimer.singleShot(50, lambda: self.le_laser.setStyleSheet("background-color: rgb(130, 130, 130)"))
 
     def update_rgb_plot(self, matrixRGB):
         vb = pg.ImageItem(image=matrixRGB)
@@ -193,14 +213,13 @@ class WindowControl(QMainWindow, Ui_MainWindow):
 
     def update_spectrum_plot(self, waves, matrixData):
         # Set the maximum to see the RGB limits and the spectrum clearly
-        spectrum = self.appController.spectrum(self.mousePositionY, self.mousePositionX)
+        spectrum = self.appController.spectrum(self.mousePositionX, self.mousePositionY)
         try:
             maximum = max(spectrum)
             minimum = min(spectrum) - 1
         except Exception as e:
             maximum = 1
             minimum = 0
-
 
         wavesLen = len(waves)
         colorValues = self.current_slider_value()
@@ -231,36 +250,26 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         self.plotBlack.setData(waves, np.full(wavesLen, minimum), pen=(0, 0, 0))
         self.plotSpectrum.setData(waves, spectrum)
 
-    def GotFolderPath(self):
-        pass
-        # LoadData
-        # Show the matrixRGB
+        self.le_x.setText(str(self.mousePositionX))
+        self.le_y.setText(str(self.mousePositionY))
 
-    def update_color(self):  # Controller
-        matrixRGB = self.appController.loadData(self.folderPath)
-        matrixData = self.appController.matrixData()
-        waves = self.appController.waves()
-        self.update_rgb_plot(matrixRGB)
-        self.update_spectrum_plot(waves, matrixData)
+    def update_slider_status(self):
+        self.dSlider_red.set_left_thumb_value(self.mapping_on_slider(self.sb_lowRed.value()))
+        self.dSlider_red.set_right_thumb_value(self.mapping_on_slider(self.sb_highRed.value()))
+        self.dSlider_green.set_left_thumb_value(self.mapping_on_slider(self.sb_lowGreen.value()))
+        self.dSlider_green.set_right_thumb_value(self.mapping_on_slider(self.sb_highGreen.value()))
+        self.dSlider_blue.set_left_thumb_value(self.mapping_on_slider(self.sb_lowBlue.value()))
+        self.dSlider_blue.set_right_thumb_value(self.mapping_on_slider(self.sb_highBlue.value()))
 
-    def set_range_to_wave(self):  # GUI
-        pass
-    #     self.sb_highRed.setMaximum(self.maxWave)
-    #     self.sb_lowRed.setMaximum(self.maxWave-1)
-    #     self.sb_highGreen.setMaximum(self.maxWave)
-    #     self.sb_lowGreen.setMaximum(self.maxWave-1)
-    #     self.sb_highBlue.setMaximum(self.maxWave)
-    #     self.sb_lowBlue.setMaximum(self.maxWave-1)
+        if self.doSliderPositionAreInitialize:
+            try:
+                matrixRGB = self.appController.matrixRGB(self.globalMaximum)
+                matrixData = self.appController.matrixData()
+                waves = self.appController.waves()
+                self.update_spectrum_plot(waves, matrixData)
+                self.update_rgb_plot(matrixRGB)
 
-    #     self.sb_highRed.setMinimum(self.minWave)
-    #     self.sb_lowRed.setMinimum(self.minWave)
-    #     self.sb_highGreen.setMinimum(self.minWave)
-    #     self.sb_lowGreen.setMinimum(self.minWave)
-    #     self.sb_highBlue.setMinimum(self.minWave)
-    #     self.sb_lowBlue.setMinimum(self.minWave)
-    #     self.sb_lowRed.setValue(self.minWave)
-    #     self.sb_highRed.setValue(round(self.rangeLen/3) + self.minWave)
-    #     self.sb_lowGreen.setValue(round(self.rangeLen/3) + self.minWave + 1)
-    #     self.sb_highGreen.setValue(round((self.rangeLen*(2/3)) + self.minWave))
-    #     self.sb_lowBlue.setValue(round((self.rangeLen*(2/3)) + self.minWave+1))
-    #     self.sb_highBlue.setValue(self.maxWave)
+            except:
+                pass
+        else:
+            self.doSliderPositionAreInitialize = True
