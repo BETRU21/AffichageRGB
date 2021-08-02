@@ -14,7 +14,7 @@ class AppControl():
         return matrixData
 
     def matrixRGB(self, globalMaximum=True):
-        colorValues = self.windowController.current_slider_value()
+        colorValues = self.windowController.currentSliderValues()
         matrixRGB = self.HSI.matrixRGB(self.HSI.data, colorValues, globalMaximum)
         return matrixRGB
 
@@ -24,7 +24,7 @@ class AppControl():
 
     def loadData(self, path):
         self.HSI.loadData(path)
-        colorValues = self.windowController.current_slider_value()
+        colorValues = self.windowController.currentSliderValues()
 
     def spectrum(self, x, y):
         spectrum = self.HSI.spectrum(x, y, self.HSI.data)

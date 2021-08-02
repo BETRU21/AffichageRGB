@@ -37,47 +37,45 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         self.setWindowIcon(QIcon(application_path + "{0}gui{0}misc{0}logo{0}logo.ico".format(os.sep)))
         self.appController = None
 
-        self.rangeLen = 1024
-        self.minWave = 0
         self.doSliderPositionAreInitialize = False
+        self.globalMaximum = True
         self.folderpath = ""
 
         self.mousePositionX = 0
         self.mousePositionY = 0
 
-        self.doSliderPositionAreInitialize = False
+        self.rangeLen = 1024
+        self.minWave = 0
 
-        self.globalMaximum = True
+        self.connectWidgets()
+        self.updateSliderStatus()
 
-        self.connect_widgets()
-        self.update_slider_status()
-
-    def connect_widgets(self):
-        self.cmb_wave.currentIndexChanged.connect(self.set_range_to_wave)
+    def connectWidgets(self):
+        self.cmb_wave.currentIndexChanged.connect(self.setRangeToWave)
         self.cmb_set_maximum.currentIndexChanged.connect(self.setMaximum)
 
-        self.graph_rgb.scene().sigMouseMoved.connect(self.mouse_moved)
-        self.pb_search.clicked.connect(self.select_save_folder)
+        self.graph_rgb.scene().sigMouseMoved.connect(self.mouseMoved)
+        self.pb_search.clicked.connect(self.selectSaveFolder)
 
-        self.dSlider_red.valueChanged.connect(self.set_red_range)
-        self.dSlider_green.valueChanged.connect(self.set_green_range)
-        self.dSlider_blue.valueChanged.connect(self.set_blue_range)
+        self.dSlider_red.valueChanged.connect(self.setColorRange)
+        self.dSlider_green.valueChanged.connect(self.setColorRange)
+        self.dSlider_blue.valueChanged.connect(self.setColorRange)
 
-        self.sb_highRed.valueChanged.connect(self.update_slider_status)
-        self.sb_lowRed.valueChanged.connect(self.update_slider_status)
-        self.sb_highGreen.valueChanged.connect(self.update_slider_status)
-        self.sb_lowGreen.valueChanged.connect(self.update_slider_status)
-        self.sb_highBlue.valueChanged.connect(self.update_slider_status)
-        self.sb_lowBlue.valueChanged.connect(self.update_slider_status)
+        self.sb_highRed.valueChanged.connect(self.updateSliderStatus)
+        self.sb_lowRed.valueChanged.connect(self.updateSliderStatus)
+        self.sb_highGreen.valueChanged.connect(self.updateSliderStatus)
+        self.sb_lowGreen.valueChanged.connect(self.updateSliderStatus)
+        self.sb_highBlue.valueChanged.connect(self.updateSliderStatus)
+        self.sb_lowBlue.valueChanged.connect(self.updateSliderStatus)
 
-    def create_plot_rgb(self):
+    def createPlotRGB(self):
         self.graph_rgb.clear()
         self.plotViewBox = self.graph_rgb.addViewBox()
         self.plotViewBox.enableAutoRange()
         self.plotViewBox.invertY(True)
         self.plotViewBox.setAspectLocked()
 
-    def create_plot_spectrum(self):
+    def createPlotSpectrum(self):
         self.graph_spectre.clear()
         self.plotItem = self.graph_spectre.addPlot()
         self.plotSpectrum = self.plotItem.plot()
@@ -87,7 +85,7 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         self.plotBlack = self.plotItem.plot()
         self.plotItem.enableAutoRange()
 
-    def mouse_moved(self, pos):
+    def mouseMoved(self, pos):
         try:
             value = self.plotViewBox.mapSceneToView(pos)
             valueSTR = str(value)
@@ -106,7 +104,7 @@ class WindowControl(QMainWindow, Ui_MainWindow):
                 self.mousePositionY = positionY
                 matrixData = self.appController.matrixData()
                 waves = self.appController.waves()
-                self.update_spectrum_plot(waves, matrixData)
+                self.updateSpectrumPlot(waves, matrixData)
         except Exception:
             pass
 
@@ -119,21 +117,17 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         matrixRGB = self.appController.matrixRGB(self.globalMaximum)
         matrixData = self.appController.matrixData()
         waves = self.appController.waves()
-        self.update_rgb_plot(matrixRGB)
+        self.updateRGBPlot(matrixRGB)
+    def setColorRange(self):
+        colorValues = self.currentSliderValues()
+        self.sb_lowRed.setValue(self.mappingOnSpinBox(colorValues[0]))
+        self.sb_highRed.setValue(self.mappingOnSpinBox(colorValues[1]))
+        self.sb_lowGreen.setValue(self.mappingOnSpinBox(colorValues[2]))
+        self.sb_highGreen.setValue(self.mappingOnSpinBox(colorValues[3]))
+        self.sb_lowBlue.setValue(self.mappingOnSpinBox(colorValues[4]))
+        self.sb_highBlue.setValue(self.mappingOnSpinBox(colorValues[5]))
 
-    def set_red_range(self):
-        self.sb_lowRed.setValue(self.mapping_on_spinBox(self.dSlider_red.get_left_thumb_value()))
-        self.sb_highRed.setValue(self.mapping_on_spinBox(self.dSlider_red.get_right_thumb_value()))
-
-    def set_green_range(self):
-        self.sb_lowGreen.setValue(self.mapping_on_spinBox(self.dSlider_green.get_left_thumb_value()))
-        self.sb_highGreen.setValue(self.mapping_on_spinBox(self.dSlider_green.get_right_thumb_value()))
-
-    def set_blue_range(self):
-        self.sb_lowBlue.setValue(self.mapping_on_spinBox(self.dSlider_blue.get_left_thumb_value()))
-        self.sb_highBlue.setValue(self.mapping_on_spinBox(self.dSlider_blue.get_right_thumb_value()))
-
-    def set_range_to_wave(self):
+    def setRangeToWave(self):
         waves = self.appController.waves()
         if self.cmb_wave.currentIndex() == 0:
             laser = int(self.le_laser.text())
@@ -142,6 +136,8 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         self.minWave = round(min(waves))
         self.rangeLen = round(max(waves) - min(waves))
         self.maxWave = int(max(waves))
+
+        colorValues = self.currentSliderValues()
 
         self.sb_highRed.setMaximum(self.maxWave)
         self.sb_lowRed.setMaximum(self.maxWave-1)
@@ -156,23 +152,23 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         self.sb_lowGreen.setMinimum(self.minWave)
         self.sb_highBlue.setMinimum(self.minWave)
         self.sb_lowBlue.setMinimum(self.minWave)
-        self.sb_lowRed.setValue(self.minWave)
 
-        self.sb_highRed.setValue(round(self.rangeLen/3) + self.minWave)
-        self.sb_lowGreen.setValue(round(self.rangeLen/3) + self.minWave + 1)
-        self.sb_highGreen.setValue(round((self.rangeLen*(2/3)) + self.minWave))
-        self.sb_lowBlue.setValue(round((self.rangeLen*(2/3)) + self.minWave+1))
-        self.sb_highBlue.setValue(self.maxWave)
+        self.sb_lowRed.setValue(self.mappingOnSpinBox(colorValues[0]))
+        self.sb_highRed.setValue(self.mappingOnSpinBox(colorValues[1]))
+        self.sb_lowGreen.setValue(self.mappingOnSpinBox(colorValues[2]))
+        self.sb_highGreen.setValue(self.mappingOnSpinBox(colorValues[3]))
+        self.sb_lowBlue.setValue(self.mappingOnSpinBox(colorValues[4]))
+        self.sb_highBlue.setValue(self.mappingOnSpinBox(colorValues[5]))
 
-        self.update_slider_status()
+        self.updateSliderStatus()
 
-    def mapping_on_slider(self, value):
+    def mappingOnSlider(self, value):
         return round(((value - self.minWave)/self.rangeLen) * 1024)
 
-    def mapping_on_spinBox(self, value):
-        return round((value/1024) * self.rangeLen+self.minWave)
+    def mappingOnSpinBox(self, value):
+        return round((value * self.rangeLen) + self.minWave)
 
-    def current_slider_value(self):
+    def currentSliderValues(self):
         lowRedValue = self.dSlider_red.get_left_thumb_value() / 1024
         highRedValue = self.dSlider_red.get_right_thumb_value() / 1024
         lowGreenValue = self.dSlider_green.get_left_thumb_value() / 1024
@@ -181,9 +177,9 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         highBlueValue = self.dSlider_blue.get_right_thumb_value() / 1024
         return [lowRedValue, highRedValue, lowGreenValue, highGreenValue, lowBlueValue, highBlueValue]
 
-    def select_save_folder(self):
+    def selectSaveFolder(self):
         if self.le_laser.text() == "":
-            self.error_laser_wavelength()
+            self.errorLaser()
         else:
             try:
                 laser = int(self.le_laser.text())
@@ -193,25 +189,26 @@ class WindowControl(QMainWindow, Ui_MainWindow):
                 matrixData = self.appController.matrixData()
                 waves = self.appController.waves()
 
-                self.create_plot_rgb()
-                self.create_plot_spectrum()
-                self.set_range_to_wave()
-                self.update_spectrum_plot(waves, matrixData)
-                self.update_rgb_plot(matrixRGB)
+                self.createPlotRGB()
+                self.createPlotSpectrum()
+                self.setRangeToWave()
+                self.updateSpectrumPlot(waves, matrixData)
+                self.updateRGBPlot(matrixRGB)
                 self.pb_search.setEnabled(False)
-            except:
-                self.error_laser_wavelength()
+            except Exception as e:
+                print(f"error:{e}")
+                self.errorLaser()
             
 
-    def error_laser_wavelength(self):
+    def errorLaser(self):
         self.le_laser.setStyleSheet("background-color: rgb(255, 0, 0)")
-        QTimer.singleShot(50, lambda: self.le_laser.setStyleSheet("background-color: rgb(130, 130, 130)"))
+        QTimer.singleShot(50, lambda: self.le_laser.setStyleSheet("background-color: rgb(200, 200, 200)"))
 
-    def update_rgb_plot(self, matrixRGB):
+    def updateRGBPlot(self, matrixRGB):
         vb = pg.ImageItem(image=matrixRGB)
         self.plotViewBox.addItem(vb)
 
-    def update_spectrum_plot(self, waves, matrixData):
+    def updateSpectrumPlot(self, waves, matrixData):
         # Set the maximum to see the RGB limits and the spectrum clearly
         spectrum = self.appController.spectrum(self.mousePositionX, self.mousePositionY)
         try:
@@ -222,7 +219,7 @@ class WindowControl(QMainWindow, Ui_MainWindow):
             minimum = 0
 
         wavesLen = len(waves)
-        colorValues = self.current_slider_value()
+        colorValues = self.currentSliderValues()
 
         # Set the position of the RGB limits
         lowRed = int( colorValues[0] * wavesLen )
@@ -253,21 +250,21 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         self.le_x.setText(str(self.mousePositionX))
         self.le_y.setText(str(self.mousePositionY))
 
-    def update_slider_status(self):
-        self.dSlider_red.set_left_thumb_value(self.mapping_on_slider(self.sb_lowRed.value()))
-        self.dSlider_red.set_right_thumb_value(self.mapping_on_slider(self.sb_highRed.value()))
-        self.dSlider_green.set_left_thumb_value(self.mapping_on_slider(self.sb_lowGreen.value()))
-        self.dSlider_green.set_right_thumb_value(self.mapping_on_slider(self.sb_highGreen.value()))
-        self.dSlider_blue.set_left_thumb_value(self.mapping_on_slider(self.sb_lowBlue.value()))
-        self.dSlider_blue.set_right_thumb_value(self.mapping_on_slider(self.sb_highBlue.value()))
+    def updateSliderStatus(self):
+        self.dSlider_red.set_left_thumb_value(self.mappingOnSlider(self.sb_lowRed.value()))
+        self.dSlider_red.set_right_thumb_value(self.mappingOnSlider(self.sb_highRed.value()))
+        self.dSlider_green.set_left_thumb_value(self.mappingOnSlider(self.sb_lowGreen.value()))
+        self.dSlider_green.set_right_thumb_value(self.mappingOnSlider(self.sb_highGreen.value()))
+        self.dSlider_blue.set_left_thumb_value(self.mappingOnSlider(self.sb_lowBlue.value()))
+        self.dSlider_blue.set_right_thumb_value(self.mappingOnSlider(self.sb_highBlue.value()))
 
         if self.doSliderPositionAreInitialize:
             try:
                 matrixRGB = self.appController.matrixRGB(self.globalMaximum)
                 matrixData = self.appController.matrixData()
                 waves = self.appController.waves()
-                self.update_spectrum_plot(waves, matrixData)
-                self.update_rgb_plot(matrixRGB)
+                self.updateSpectrumPlot(waves, matrixData)
+                self.updateRGBPlot(matrixRGB)
 
             except:
                 pass
