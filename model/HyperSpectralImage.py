@@ -24,7 +24,7 @@ class HyperSpectralImage:
     def deleteWavelength(self):
         self.wavelength = []
 
-    def WaveNumber(self, laser):
+    def waveNumber(self, laser):
         waveNumber = ((1 / laser) - (1 / self.wavelength)) * 10 ** 7
         return waveNumber.round(0)
 

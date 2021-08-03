@@ -18,8 +18,11 @@ class AppControl():
         matrixRGB = self.HSI.matrixRGB(self.HSI.data, colorValues, globalMaximum)
         return matrixRGB
 
-    def waves(self):
-        waves = self.HSI.wavelength
+    def waves(self, laser):
+        if self.windowController.waveNumber == True:
+            waves = self.HSI.waveNumber(laser)
+        else:
+            waves = self.HSI.wavelength
         return waves
 
     def loadData(self, path):
@@ -29,6 +32,9 @@ class AppControl():
     def spectrum(self, x, y):
         spectrum = self.HSI.spectrum(x, y, self.HSI.data)
         return spectrum
+
+    def deleteSpectrum(self):
+        self.HSI.deleteSpectrum()
 
 
 

@@ -40,6 +40,7 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         self.doSliderPositionAreInitialize = False
         self.globalMaximum = True
         self.folderpath = ""
+        self.waveNumber = True
 
         self.mousePositionX = 0
         self.mousePositionY = 0
@@ -103,7 +104,7 @@ class WindowControl(QMainWindow, Ui_MainWindow):
                 self.mousePositionX = positionX
                 self.mousePositionY = positionY
                 matrixData = self.appController.matrixData()
-                waves = self.appController.waves()
+                waves = self.appController.waves(int(self.le_laser.text()))
                 self.updateSpectrumPlot(waves, matrixData)
         except Exception:
             pass
@@ -116,7 +117,7 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         self.appController.loadData(self.folderPath)
         matrixRGB = self.appController.matrixRGB(self.globalMaximum)
         matrixData = self.appController.matrixData()
-        waves = self.appController.waves()
+        waves = self.appController.waves(int(self.le_laser.text()))
         self.updateRGBPlot(matrixRGB)
     def setColorRange(self):
         colorValues = self.currentSliderValues()
@@ -128,10 +129,11 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         self.sb_highBlue.setValue(self.mappingOnSpinBox(colorValues[5]))
 
     def setRangeToWave(self):
-        waves = self.appController.waves()
-        if self.cmb_wave.currentIndex() == 0:
-            laser = int(self.le_laser.text())
-            waves = ((1 / laser) - (1 / waves)) * 10 ** 7     
+        if self.cmb_wave.currentIndex() == 0: 
+            self.waveNumber = True
+        else:
+            self.waveNumber = False 
+        waves = self.appController.waves(int(self.le_laser.text()))
 
         self.minWave = round(min(waves))
         self.rangeLen = round(max(waves) - min(waves))
@@ -184,17 +186,17 @@ class WindowControl(QMainWindow, Ui_MainWindow):
             try:
                 laser = int(self.le_laser.text())
                 self.folderPath = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
+                self.appController.deleteSpectrum()
                 self.appController.loadData(self.folderPath)
                 matrixRGB = self.appController.matrixRGB(self.globalMaximum)
                 matrixData = self.appController.matrixData()
-                waves = self.appController.waves()
+                waves = self.appController.waves(int(self.le_laser.text()))
 
                 self.createPlotRGB()
                 self.createPlotSpectrum()
                 self.setRangeToWave()
                 self.updateSpectrumPlot(waves, matrixData)
                 self.updateRGBPlot(matrixRGB)
-                self.pb_search.setEnabled(False)
             except Exception as e:
                 print(f"error:{e}")
                 self.errorLaser()
@@ -262,7 +264,7 @@ class WindowControl(QMainWindow, Ui_MainWindow):
             try:
                 matrixRGB = self.appController.matrixRGB(self.globalMaximum)
                 matrixData = self.appController.matrixData()
-                waves = self.appController.waves()
+                waves = self.appController.waves(int(self.le_laser.text()))
                 self.updateSpectrumPlot(waves, matrixData)
                 self.updateRGBPlot(matrixRGB)
 
