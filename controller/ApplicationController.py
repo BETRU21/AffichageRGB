@@ -7,19 +7,19 @@ from model.HyperSpectralImage import HyperSpectralImage
 class AppControl():
     def __init__(self):
         self.HSI = HyperSpectralImage()
-        self.windowController = None
+        self.windowControl = None
 
     def matrixData(self):
         matrixData = self.HSI.matrixData(self.HSI.data)
         return matrixData
 
     def matrixRGB(self, globalMaximum=True):
-        colorValues = self.windowController.currentSliderValues()
+        colorValues = self.windowControl.currentSliderValues()
         matrixRGB = self.HSI.matrixRGB(self.HSI.data, colorValues, globalMaximum)
         return matrixRGB
 
     def waves(self, laser):
-        if self.windowController.waveNumber == True:
+        if self.windowControl.waveNumber == True:
             waves = self.HSI.waveNumber(laser)
         else:
             waves = self.HSI.wavelength
@@ -27,7 +27,7 @@ class AppControl():
 
     def loadData(self, path):
         self.HSI.loadData(path)
-        colorValues = self.windowController.currentSliderValues()
+        colorValues = self.windowControl.currentSliderValues()
 
     def spectrum(self, x, y):
         spectrum = self.HSI.spectrum(x, y, self.HSI.data)
@@ -35,6 +35,14 @@ class AppControl():
 
     def deleteSpectrum(self):
         self.HSI.deleteSpectrum()
+
+    def width(self):
+        width = self.HSI.widthImage(self.HSI.data)
+        return width
+
+    def height(self):
+        height = self.HSI.heightImage(self.HSI.data)
+        return height
 
 
 

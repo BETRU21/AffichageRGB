@@ -35,7 +35,7 @@ class WindowControl(QMainWindow, Ui_MainWindow):
         super().__init__(parent)
         self.setupUi(self)
         self.setWindowIcon(QIcon(application_path + "{0}gui{0}misc{0}logo{0}logo.ico".format(os.sep)))
-        self.appController = None
+        self.appControl = None
 
         self.doSliderPositionAreInitialize = False
         self.globalMaximum = True
@@ -97,16 +97,27 @@ class WindowControl(QMainWindow, Ui_MainWindow):
             positionY = int(float(position[1]))
             positionX = int(float(position[0]))
 
+            width = self.appControl.width()
+            height = self.appControl.height()
+
             if positionX <= -1 or positionY <= -1:
+                pass
+
+            elif positionX >= width:
+                pass
+
+            elif positionY >= height:
                 pass
 
             else:
                 self.mousePositionX = positionX
                 self.mousePositionY = positionY
-                matrixData = self.appController.matrixData()
-                waves = self.appController.waves(int(self.le_laser.text()))
+                laser = 785
+                waves = self.appControl.waves(laser)
+                matrixData = self.appControl.matrixData()
                 self.updateSpectrumPlot(waves, matrixData)
-        except Exception:
+        except Exception as e:
+            print(e)
             pass
 
     def setMaximum(self):
@@ -114,10 +125,10 @@ class WindowControl(QMainWindow, Ui_MainWindow):
             self.globalMaximum = True
         else:
             self.globalMaximum = False
-        self.appController.loadData(self.folderPath)
-        matrixRGB = self.appController.matrixRGB(self.globalMaximum)
-        matrixData = self.appController.matrixData()
-        waves = self.appController.waves(int(self.le_laser.text()))
+        self.appControl.loadData(self.folderPath)
+        matrixRGB = self.appControl.matrixRGB(self.globalMaximum)
+        matrixData = self.appControl.matrixData()
+        waves = self.appControl.waves(int(self.le_laser.text()))
         self.updateRGBPlot(matrixRGB)
     def setColorRange(self):
         colorValues = self.currentSliderValues()
@@ -133,7 +144,7 @@ class WindowControl(QMainWindow, Ui_MainWindow):
             self.waveNumber = True
         else:
             self.waveNumber = False 
-        waves = self.appController.waves(int(self.le_laser.text()))
+        waves = self.appControl.waves(int(self.le_laser.text()))
 
         self.minWave = round(min(waves))
         self.rangeLen = round(max(waves) - min(waves))
@@ -186,11 +197,11 @@ class WindowControl(QMainWindow, Ui_MainWindow):
             try:
                 laser = int(self.le_laser.text())
                 self.folderPath = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
-                self.appController.deleteSpectrum()
-                self.appController.loadData(self.folderPath)
-                matrixRGB = self.appController.matrixRGB(self.globalMaximum)
-                matrixData = self.appController.matrixData()
-                waves = self.appController.waves(int(self.le_laser.text()))
+                self.appControl.deleteSpectrum()
+                self.appControl.loadData(self.folderPath)
+                matrixRGB = self.appControl.matrixRGB(self.globalMaximum)
+                matrixData = self.appControl.matrixData()
+                waves = self.appControl.waves(int(self.le_laser.text()))
 
                 self.createPlotRGB()
                 self.createPlotSpectrum()
@@ -212,7 +223,7 @@ class WindowControl(QMainWindow, Ui_MainWindow):
 
     def updateSpectrumPlot(self, waves, matrixData):
         # Set the maximum to see the RGB limits and the spectrum clearly
-        spectrum = self.appController.spectrum(self.mousePositionX, self.mousePositionY)
+        spectrum = self.appControl.spectrum(self.mousePositionX, self.mousePositionY)
         try:
             maximum = max(spectrum)
             minimum = min(spectrum) - 1
@@ -262,9 +273,9 @@ class WindowControl(QMainWindow, Ui_MainWindow):
 
         if self.doSliderPositionAreInitialize:
             try:
-                matrixRGB = self.appController.matrixRGB(self.globalMaximum)
-                matrixData = self.appController.matrixData()
-                waves = self.appController.waves(int(self.le_laser.text()))
+                matrixRGB = self.appControl.matrixRGB(self.globalMaximum)
+                matrixData = self.appControl.matrixData()
+                waves = self.appControl.waves(int(self.le_laser.text()))
                 self.updateSpectrumPlot(waves, matrixData)
                 self.updateRGBPlot(matrixRGB)
 

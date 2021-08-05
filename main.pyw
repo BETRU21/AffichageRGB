@@ -8,8 +8,8 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     ui = WindowControl()
     ac = AppControl()
-    ac.windowController = ui
-    ui.appController = ac
+    ac.windowControl = ui
+    ui.appControl = ac
     ui.setWindowTitle("affichageRGB")
     ui.show()
     sys.exit(app.exec_())
