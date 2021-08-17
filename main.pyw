@@ -6,6 +6,7 @@ import sys
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setStyle("Fusion")
     ui = WindowControl()
     ac = AppControl()
     ac.windowControl = ui
